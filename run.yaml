@@ -1,5 +1,7 @@
-path : data
-model : ft-transformer
+common :
+  path : data
+  model : ft-transformer
+
 train:
   fold : 15
   epochs : 40

@@ -1,9 +1,12 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1, 2, 3, 4, 5, 6, 7, 8, 9' 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1, 2, 3' 
 import yaml
+import typing as ty
 import argparse
 import torch
+from train import model_train
+from infer import model_infer
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -14,10 +17,9 @@ if __name__ == "__main__":
 
     with open("run.yaml") as f:
         config = yaml.load(f, Loader = yaml.FullLoader)[args.action]
+        common = yaml.load(f, Loader = yaml.FullLoader)["common"]
 
-
-
-    
-    
-
-    os.path.exists()
+    if args.action == "train":
+        model_train(args, config, common)
+    else:
+        model_infer(args, config, common)

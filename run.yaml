@@ -1,11 +1,13 @@
 common :
   path : data
   model : ft-transformer
-
+  tune : 0
 train:
   fold : 15
   epochs : 40
   lr : 1e-3
+  weight_decay : 1e-5
+  optim : AdamW
 
   description: Demonstration of the CCS811 Digital Gas Sensor driver
   name: CCS811 sample  

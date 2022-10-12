@@ -6,7 +6,7 @@ import typing as ty
 def load_dataset(data_path : ty.Optional[str]) -> ty.Dict[str, ty.Union(np.ndarray, str)]:
     """
     load data and json info
-    
+    return train_dict, val_dict, test_dict
     """
     info_json = "info.json"
     N_train, y_train = "N_train.npy", "y_train.npy"

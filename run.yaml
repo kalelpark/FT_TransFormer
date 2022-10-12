@@ -1,10 +1,14 @@
 common :
-  path : data
+  data_path : data
+  model_save_path : output
+  parallel : 1
   model : ft-transformer
-  tune : 0
-train:
   fold : 15
   epochs : 40
+  batchsize : 32
+  
+train:
+  tune : 0
   lr : 1e-3
   weight_decay : 1e-5
   optim : AdamW

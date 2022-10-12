@@ -2,6 +2,35 @@ import os
 import json
 import numpy as np
 import typing as ty
+from torch import Tensor
+from torch.utils.data import Dataset, DataLoader
+
+class npy_dataset(Dataset):
+    def __init__(self, data, label):
+        self.data = data
+        self.label = label
+    
+    def __getitem__(self, idx):
+        x_data = Tensor(self.data[idx])
+        y_label = Tensor(self.label[idx])
+
+        return x_data, y_label
+    
+    def __len__(self):
+        return len(self.data)
+
+def get_DataLoader(train_data : ty.Dict[np.ndarray], valid_data : ty.Dict[np.ndarray]) -> DataLoader:
+    """
+    Making CustomDataLoader
+    """ 
+    train_dataset = npy_dataset(train_data["N_train"], train_data["y_train"])
+    valid_dataset = npy_dataset(valid_data["N_val"], valid_data["y_val"])
+    
+    train_dataloader, valid_dataloader = DataLoader(train_dataset, batch_size = 32), DataLoader(valid_dataset, batch_size = 32)
+    
+    return train_dataloader, valid_dataloader
+
+
 
 def load_dataset(data_path : ty.Optional[str]) -> ty.Dict[str, ty.Union(np.ndarray, str)]:
     """

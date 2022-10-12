@@ -14,3 +14,8 @@ python main.py --action test
 
 # -- test fold [Ensemble]
 python main.py --action test
+
+# --- run.yaml
+# common : path, model, ensem
+            
+# train : 

@@ -1,6 +1,8 @@
-# Research on Tabular Deep Learning [FT - Transformer, ResNet]
+# Research on Tabular Deep Learning
 
 **For paper implementations, see the section ["Papers and projects"](#papers-and-projects).**
+
+**Experiment Model [FT - Transformer, ResNet]**
 
 ```
 $cd Researh

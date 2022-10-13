@@ -9,16 +9,16 @@ train:
   optim : AdamW
   lr : 1e-3
   weight_decay : 1e-5
-  batchsize : 32
-  epochs : 40
+  batchsize : 256
+  epochs : 80
   fold : 15
   
   description: Training DL model for Tabular Data
-
+  project : wandb_
 
 # -- Test
 test:
-  batchsize : 32
+  batchsize : 256
   model : ft-transformer
   saved_model_path : 
 

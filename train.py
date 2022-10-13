@@ -20,8 +20,11 @@ def model_train(args : ty.Any, config : ty.Dict[str, ty.Union(str, int, float)])
     config have train & test info (lr, optim, model) in the form Dictionary.
     check run.yaml File.  - If you question or Error, leave an Issue.
     """
+    
+    wandb.init(name = config["model"] + '-' + config["lr"], project = args.action + config["description"])
+    wandb.config = config
 
-    data_folders = os.listdir(config["data_path"])    
+    data_folders = sorted(os.listdir(config["data_path"]))
     for data_folder in data_folders:
         data_path = os.path.join(config["data_path"], data_folder)
         train_dict, val_dict, test_dict, info_dict = load_dataset(data_path)
@@ -60,9 +63,11 @@ def model_run(  model : torch.Module , optimizer : torch.optim, loss_fn : torch.
     and make json_file to see info trained_model score. score get train, valid accuracy
     - If you question or Error, leave an Issue.
     """
-
+    
     json_info = OrderedDict()
     model.to(args.device)
+    wandb.watch(model)
+    
     for epoch in range(config["epochs"]):
         train_loss_score, valid_loss_score = 0, 0
         best_valid = 0
@@ -98,5 +103,9 @@ def model_run(  model : torch.Module , optimizer : torch.optim, loss_fn : torch.
             json_info["epochs"] = config["epochs"]
             json_info["valid_accuracy"] = valid_accuracy_score
             json_info["task_name"] = config["task_name"]
-    
-    pass
+
+        wandb.log({
+            "train_accuracy" : train_accuracy_score,
+            "valid_accuracy" : valid_accuracy_score,
+            "train_loss" : train_loss_score
+        })

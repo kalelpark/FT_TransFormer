@@ -1,14 +1,18 @@
-# import os
-# import yaml
-# import numpy as np
-# from sklearn.model_selection import train_test_split
-# import json
-# from collections import OrderedDict
+import os
+import yaml
+import numpy as np
+from sklearn.model_selection import train_test_split
+import json
+from collections import OrderedDict
 
 array_list = list()
 temp = [1, 2, 3, 4]
 array_list.extend(temp)
 print(array_list)
+data_folders = os.listdir("data")
+print(data_folders)   
+print(sorted(data_folders))
+print(data_folders)
 
 # file_data = OrderedDict()
 

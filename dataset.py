@@ -19,36 +19,42 @@ class npy_dataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-def get_DataLoader(train_data : ty.Dict[np.ndarray], valid_data : ty.Dict[np.ndarray]) -> DataLoader:
+def get_DataLoader( train_data : ty.Dict[np.ndarray], 
+                    valid_data : ty.Dict[np.ndarray], 
+                    config : ty.Dict[str, ty.Union(str, int)]) -> DataLoader:
+
     """
-    Making CustomDataLoader
+    train_data, and default valid_data, you can change batch_size.
+    checking about run.yaml file. config is default.
+    - If you question or Error, leave an Issue.
     """ 
+    
     train_dataset = npy_dataset(train_data["N_train"], train_data["y_train"])
     valid_dataset = npy_dataset(valid_data["N_val"], valid_data["y_val"])
     
-    train_dataloader, valid_dataloader = DataLoader(train_dataset, batch_size = 32), DataLoader(valid_dataset, batch_size = 32)
+    train_dataloader = DataLoader(train_dataset, batch_size = config["batchsize"], pin_memory = True)
+    valid_dataloader = DataLoader(valid_dataset, batch_size = config["batchsize"], pin_memory = True)
     
     return train_dataloader, valid_dataloader
 
 
+def load_dataset(data_path : str) ->  ty.List(ty.Dict[str, np.ndarray], ty.Dict[str, ty.Union(str, int)]):
+    
+    """
+    load data and json info and return train_dict, val_dict, test_dict
+    - If you question or Error, leave an Issue.
+    """
 
-def load_dataset(data_path : ty.Optional[str]) -> ty.Dict[str, ty.Union(np.ndarray, str)]:
-    """
-    load data and json info
-    return train_dict, val_dict, test_dict
-    """
     info_json = "info.json"
     N_train, y_train = "N_train.npy", "y_train.npy"
     N_test, y_test = "N_test.npy", "y_test.npy"
     N_val, y_val = "N_val.npy", "y_val.npy"
+
     json_path = os.path.join(data_path, info_json)
-    info_dict = {}
     
     with open(json_path, "r") as f:
         json_dict = json.load(f)
-        json_data = json.dumps(json_dict)
-        info_dict["task_type"] = json_data["task_type"] 
-        info_dict["n_classes"] = json_data["n_classes"]
+        info_dict = json.dumps(json_dict)
 
     train_dict = {}
     val_dict = {}

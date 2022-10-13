@@ -11,15 +11,15 @@ from infer import model_infer
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", type = "str", required = True)
+    parser.add_argument("--single", type = "int", required = True)
     args = parser.parse_args()
     
     args.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     with open("run.yaml") as f:
         config = yaml.load(f, Loader = yaml.FullLoader)[args.action]
-        common = yaml.load(f, Loader = yaml.FullLoader)["common"]
-
     if args.action == "train":
-        model_train(args, config, common)
+        model_train(args, config)
     else:
-        model_infer(args, config, common)
+        # model_infer(args, config, common)
+        pass

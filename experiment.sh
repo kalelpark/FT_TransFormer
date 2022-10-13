@@ -1,21 +1,22 @@
 # --- Just Revisiting Deep Learning Models for Tabular Data
 
-# -- train default [Single]
-python main.py --action train
+# if you change model, check, run.yaml
 
+# -- train default [Single]
+python main.py --action train --single 1
 
 # -- train fold [Ensemble]
-python main.py --action train
+python main.py --action train --single 0
 
 
 # -- test default [Single]
-python main.py --action test
+python main.py --action test --single 1
 
 
 # -- test fold [Ensemble]
-python main.py --action test
+python main.py --action test --single 0
 
 # --- run.yaml
-# common : path, model, ensem
+
             
 # train : 

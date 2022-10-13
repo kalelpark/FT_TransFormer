@@ -6,3 +6,5 @@ model.py
 preprocess.py
 utils.py
 output
+wandb
+__pycache__

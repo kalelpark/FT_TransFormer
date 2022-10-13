@@ -21,7 +21,7 @@ class npy_dataset(Dataset):
 
 def get_DataLoader( train_data : ty.Dict[str, np.ndarray], 
                     valid_data : ty.Dict[str, np.ndarray], 
-                    config : ty.Dict[str, ty.Union(str, int)]) -> DataLoader:
+                    config):
 
     """
     train_data, and default valid_data, you can change batch_size.
@@ -38,7 +38,7 @@ def get_DataLoader( train_data : ty.Dict[str, np.ndarray],
     return train_dataloader, valid_dataloader
 
 
-def load_dataset(data_path : str) ->  ty.List(ty.Dict[str, np.ndarray], ty.Dict[str, ty.Union(str, int)]):
+def load_dataset(data_path : str) ->  ty.List[ty.Dict[str, str]]:
     
     """
     load data and json info and return train_dict, val_dict, test_dict
@@ -53,8 +53,7 @@ def load_dataset(data_path : str) ->  ty.List(ty.Dict[str, np.ndarray], ty.Dict[
     json_path = os.path.join(data_path, info_json)
     
     with open(json_path, "r") as f:
-        json_dict = json.load(f)
-        info_dict = json.dumps(json_dict)
+        info_dict = json.load(f)
 
     train_dict = {}
     val_dict = {}

@@ -13,7 +13,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 import wandb
 from collections import OrderedDict
 
-def model_train(args : ty.Any, config : ty.Dict[str, ty.Union(str, int, float)]) -> None:
+def model_train(args : ty.Any, config : ty.Dict[str, ty.List[str]]) -> None:
 
     """
     args have device info (CPU, GPU, etc..) if you modfiy info, check main.py
@@ -58,10 +58,10 @@ def model_train(args : ty.Any, config : ty.Dict[str, ty.Union(str, int, float)])
             train_dataloader, valid_dataloader = get_DataLoader(train_dict, val_dict, config)
             model_run(model, optimizer, loss_fn, data_folder, train_dataloader, valid_dataloader, info_dict, args, config)
                 
-def model_run(  model : torch.Module , optimizer : torch.optim, 
-                loss_fn : torch.functional, data_name : str,
-                train_dataloader : DataLoader, valid_dataloader : DataLoader, info_dict,
-                 args : ty.Any, config : ty.Dict[str, ty.Union(str, int)]) -> ty.List[float]:
+def model_run(  model, optimizer, 
+                loss_fn, data_name : str,
+                train_dataloader, valid_dataloader, info_dict,
+                 args : ty.Any, config : ty.Dict[str, ty.List[str]]) ->ty.List[float]:
 
     """
     if you change any options, you will see model_train function, and run.yaml File

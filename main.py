@@ -10,7 +10,7 @@ from infer import model_infer
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--action", type = "str", required = True)
+    parser.add_argument("--action", type = str, required = True)
     args = parser.parse_args()
     
     args.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")

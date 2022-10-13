@@ -8,7 +8,7 @@ from sklearn.model_selection import KFold
 # N_train, N_val, y_train
 # info_json
 
-def model_infer(args, config, common):
+def model_infer(args, config):
     pass
     
 

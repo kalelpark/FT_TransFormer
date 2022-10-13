@@ -18,28 +18,32 @@ def model_train(args : ty.Any, config : ty.Dict[str, ty.Union(str, int, float)])
     """
     args have device info (CPU, GPU, etc..) if you modfiy info, check main.py
     config have train & test info (lr, optim, model) in the form Dictionary.
-    check run.yaml File.  - If you question or Error, leave an Issue.
+    check run.yaml File.  
+    - If you question or Error, leave an Issue.
     """
-    
-    wandb.init(name = config["model"] + '-' + config["lr"], project = args.action + config["description"])
-    wandb.config = config
-
     data_folders = sorted(os.listdir(config["data_path"]))
     for data_folder in data_folders:
+
+        if int(config["fold"]) > 0:
+            pass
+        else:
+            wandb.init( name = config["model"] + '-' + config["lr"], 
+                        project = data_folder + '_' + args.action + '_' + config["description"])
+            wandb.config = config
+        
         data_path = os.path.join(config["data_path"], data_folder)
         train_dict, val_dict, test_dict, info_dict = load_dataset(data_path)
-        print("looaded Dataset..")
+        print("loaded Dataset..")
 
         model = load_model(config, info_dict)
-
         print("loaded Model..")
         
         optimizer = get_optimizer(model, config)
         loss_fn = get_loss(info_dict)
-        print("loaded optimizer and loss_fn..")
+        print("loaded optimizer and loss..")
 
-        if config["fold"] > 0:
-            print("KFOLD Training..")
+        if int(config["fold"]) > 0:
+            print("Fold Training..")
             kf = KFold(get_splits = 15)
             for idxx, (train_idx, temp_idx) in enumerate(kf.split(train_dict["N_train"], train_dict["y_train"])):  # X_train, X_temp, y_train, y_temp = 
                 fold_train_dict = {}
@@ -50,12 +54,14 @@ def model_train(args : ty.Any, config : ty.Dict[str, ty.Union(str, int, float)])
             """
             Default : Singe Training
             """
+            print("Single[default] Training..")
             train_dataloader, valid_dataloader = get_DataLoader(train_dict, val_dict, config)
-            model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, args, config)
+            model_run(model, optimizer, loss_fn, data_folder, train_dataloader, valid_dataloader, info_dict, args, config)
                 
-def model_run(  model : torch.Module , optimizer : torch.optim, loss_fn : torch.functional, 
-                train_dataloader : DataLoader, valid_dataloader : DataLoader, args : ty.Any, 
-                config : ty.Dict[str, ty.Union(str, int)]) -> ty.List[float]:
+def model_run(  model : torch.Module , optimizer : torch.optim, 
+                loss_fn : torch.functional, data_name : str,
+                train_dataloader : DataLoader, valid_dataloader : DataLoader, info_dict,
+                 args : ty.Any, config : ty.Dict[str, ty.Union(str, int)]) -> ty.List[float]:
 
     """
     if you change any options, you will see model_train function, and run.yaml File
@@ -66,13 +72,20 @@ def model_run(  model : torch.Module , optimizer : torch.optim, loss_fn : torch.
     
     json_info = OrderedDict()
     model.to(args.device)
-    wandb.watch(model)
-    
+    # wandb.watch(model)
+    method =  "ensemble" if config["fold"] > 0 else "default"
+    info_save_path = os.path.join(config["output_path"], config["model"], data_name, method)
+    print("start_training..")
     for epoch in range(config["epochs"]):
         train_loss_score, valid_loss_score = 0, 0
-        best_valid = 0
-        train_prediction, valid_prediction = list(), list()
-
+        if info_dict["task_type"] == "regression":
+            best_valid = 1e10
+        else:
+            best_valid = 0
+        
+        train_pred, valid_pred = list(), list()
+        train_label, valid_label = list(), list()
+        
         for X_data, y_label in train_dataloader:
             model.train()
             optimizer.zero_grad()
@@ -81,31 +94,51 @@ def model_run(  model : torch.Module , optimizer : torch.optim, loss_fn : torch.
             loss = loss_fn(y_pred, y_label)
             loss.backward()
             optimizer.step()
-            train_loss_score += loss.item()
-            train_prediction.extend(y_pred)
-            
-        train_accuracy_score = get_accuracy_score(y_pred, y_label)
+            train_loss_score += loss.item() 
+
+            train_pred.extend(y_pred)
+            train_label.extend(y_label)
+        
+        if info_dict["task_type"] == "regression":
+            train_score = get_rmse_score(train_pred, train_label)
+        else:
+            train_score = get_accuracy_score(train_pred, train_pred)
         
         model.eval()
-        valid_prediction = list()
         for X_data, y_label in valid_dataloader:
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             y_pred = model(X_data)
-            valid_prediction.extend(y_pred)
+            valid_pred.extend(y_pred)
+            valid_label.extend(y_label)
         
-        valid_accuracy_score = get_accuracy_score(y_pred, y_label)
+        if info_dict["task_type"] == "regression":
+            valid_score = get_rmse_score(valid_pred, valid_label)
+        else:
+            valid_score = get_accuracy_score(valid_pred, valid_label)
+        
 
-        if best_valid < valid_accuracy_score:
-            best_valid = valid_accuracy_score
-            save_model(model, config)
-            
-            json_info["model"] = config["model"]
-            json_info["epochs"] = config["epochs"]
-            json_info["valid_accuracy"] = valid_accuracy_score
-            json_info["task_name"] = config["task_name"]
+        if info_dict["task_type"] == "regression":
+            if best_valid > valid_score:
+                best_valid = valid_score
+
+                json_info["model"] = config["model"]
+                json_info["epochs"] = config["epochs"]
+                json_info["valid_accuracy"] = valid_score
+                json_info["task_name"] = config["task_name"]
+                save_mode_with_json(model, json_info,config, info_save_path)
+        
+        else:
+            if best_valid < valid_score:
+                best_valid = valid_score
+                
+                json_info["model"] = config["model"]
+                json_info["epochs"] = config["epochs"]
+                json_info["valid_accuracy"] = valid_score
+                json_info["task_name"] = config["task_name"]
+                save_mode_with_json(model, json_info,config, info_save_path)
 
         wandb.log({
-            "train_accuracy" : train_accuracy_score,
-            "valid_accuracy" : valid_accuracy_score,
+            "train_score" : train_score,
+            "valid_score" : valid_score,
             "train_loss" : train_loss_score
         })

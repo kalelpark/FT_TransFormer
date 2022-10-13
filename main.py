@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1, 2, 3' 
+os.environ['CUDA_VISIBLE_DEVICES'] = '8, 9' 
 import yaml
 import typing as ty
 import argparse
@@ -11,7 +11,6 @@ from infer import model_infer
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", type = "str", required = True)
-    parser.add_argument("--single", type = "int", required = True)
     args = parser.parse_args()
     
     args.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -21,5 +20,4 @@ if __name__ == "__main__":
     if args.action == "train":
         model_train(args, config)
     else:
-        # model_infer(args, config, common)
-        pass
+        model_infer(args, config)

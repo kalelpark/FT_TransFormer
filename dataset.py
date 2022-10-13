@@ -19,8 +19,8 @@ class npy_dataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-def get_DataLoader( train_data : ty.Dict[np.ndarray], 
-                    valid_data : ty.Dict[np.ndarray], 
+def get_DataLoader( train_data : ty.Dict[str, np.ndarray], 
+                    valid_data : ty.Dict[str, np.ndarray], 
                     config : ty.Dict[str, ty.Union(str, int)]) -> DataLoader:
 
     """

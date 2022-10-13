@@ -3,7 +3,7 @@
 # -- Train
 train:
   data_path : data
-  model_save_path : output
+  output_path : output
   parallel : 1
   model : ft-transformer
   optim : AdamW
@@ -11,7 +11,7 @@ train:
   weight_decay : 1e-5
   batchsize : 256
   epochs : 80
-  fold : 15
+  fold : 0
   
   description: Training DL model for Tabular Data
   project : wandb_

@@ -1,26 +1,18 @@
 # --- Just Revisiting Deep Learning Models for Tabular Data
 
-# """
-# if you hope ensemble, see run.yaml.
-# run.yaml gets model parameters, architecture.
-# this file just train or test.
-# """
+# Argument Explanation
+# --action : train or test [but, if you need to for review, using train!(This can give all about information!)]
+# --model : Choose FT Transformer, ResNet
+# --datapath : Choose data [check data file or README.md]
+# --savepath : saved all about Information
 
-# Ensem
-# -- train default [Single]
-python main.py --action train
+# If you any Question, leave an Issue.
 
-# -- train fold [Ensemble]
-# python main.py --action train
+# TIP!
+python main.py --action train --model fttransformer --datapath data/microsoft --savepath output/
 
-# # -- test default [Single]
-# python main.py --action test
+# ResNet
+# python main.py --action train --model resnet --datapath data/microsoft --savepath output/
 
-
-# # -- test fold [Ensemble]
-# python main.py --action test
-
-# --- run.yaml
-
-            
-# train : 
+# XGBoost (Later Update!)
+# python main.py --action train --model resnet --datapath data/microsoft --savepath output/

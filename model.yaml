@@ -1,9 +1,5 @@
-
-
-# -- Train
-train:
-  data_path : data
-  output_path : output
+# Yaml file get Model Parameter and Architecture
+fttransformer: 
   parallel : 1
   model : ft-transformer
   optim : AdamW
@@ -13,13 +9,11 @@ train:
   epochs : 80
   fold : 0
   
-  description: Training DL model for Tabular Data
-  project : wandb_
+  description: Training DL model [ FT_Transformer ] for Tabular Data
 
-# -- Test
-test:
+resnet:
   batchsize : 256
   model : ft-transformer
   saved_model_path : 
 
-  description: Test DL model for Tabular Data
+  description: Training DL model [ ResNet ] for Tabular Data

@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn as nn
+from torch import LongTensor
 import rtdl
 import typing as ty
 import yaml
@@ -13,7 +14,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 import wandb
 from collections import OrderedDict
 
-def model_train(args : ty.Any, config : ty.Dict[str, ty.List[str]]) -> None:
+def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
 
     """
     args have device info (CPU, GPU, etc..) if you modfiy info, check main.py
@@ -40,6 +41,7 @@ def model_train(args : ty.Any, config : ty.Dict[str, ty.List[str]]) -> None:
         
         optimizer = get_optimizer(model, config)
         loss_fn = get_loss(info_dict)
+        loss_fn.to(args.device)
         print("loaded optimizer and loss..")
 
         if int(config["fold"]) > 0:
@@ -76,6 +78,7 @@ def model_run(  model, optimizer,
     method =  "ensemble" if config["fold"] > 0 else "default"
     info_save_path = os.path.join(config["output_path"], config["model"], data_name, method)
     print("start_training..")
+    loss_fn
     for epoch in range(config["epochs"]):
         train_loss_score, valid_loss_score = 0, 0
         if info_dict["task_type"] == "regression":
@@ -90,7 +93,7 @@ def model_run(  model, optimizer,
             model.train()
             optimizer.zero_grad()
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            y_pred = model(X_data)
+            y_pred = model(X_data, x_cat=None)
             loss = loss_fn(y_pred, y_label)
             loss.backward()
             optimizer.step()
@@ -108,6 +111,7 @@ def model_run(  model, optimizer,
         for X_data, y_label in valid_dataloader:
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             y_pred = model(X_data)
+
             valid_pred.extend(y_pred)
             valid_label.extend(y_label)
         

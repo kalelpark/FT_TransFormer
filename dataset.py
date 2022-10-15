@@ -3,6 +3,7 @@ import json
 import numpy as np
 import typing as ty
 from torch import Tensor
+from torch import FloatTensor
 from torch.utils.data import Dataset, DataLoader
 
 class npy_dataset(Dataset):
@@ -11,8 +12,8 @@ class npy_dataset(Dataset):
         self.label = label
     
     def __getitem__(self, idx):
-        x_data = Tensor(self.data[idx])
-        y_label = Tensor(self.label[idx])
+        x_data = FloatTensor(self.data)[idx]
+        y_label = FloatTensor(self.label)[idx]
 
         return x_data, y_label
     
@@ -32,8 +33,8 @@ def get_DataLoader( train_data : ty.Dict[str, np.ndarray],
     train_dataset = npy_dataset(train_data["N_train"], train_data["y_train"])
     valid_dataset = npy_dataset(valid_data["N_val"], valid_data["y_val"])
     
-    train_dataloader = DataLoader(train_dataset, batch_size = config["batchsize"], pin_memory = True)
-    valid_dataloader = DataLoader(valid_dataset, batch_size = config["batchsize"], pin_memory = True)
+    train_dataloader = DataLoader(train_dataset, batch_size = int(config["batchsize"]), pin_memory = True)
+    valid_dataloader = DataLoader(valid_dataset, batch_size = int(config["batchsize"]), pin_memory = True)
     
     return train_dataloader, valid_dataloader
 

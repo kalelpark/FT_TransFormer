@@ -1,30 +1,36 @@
 import os
+from torch import Tensor 
 import yaml
 import numpy as np
 from sklearn.model_selection import train_test_split
 import json
 from collections import OrderedDict
+from torch.utils.data import Dataset, DataLoader
 
-temp = os.path.join("a", "b", "c")
+class npy_dataset(Dataset):
+    def __init__(self, data, label):
+        self.data = data
+        self.label = label
+    
+    def __getitem__(self, idx):
+        x_data = Tensor(self.data)[idx]
+        y_label = Tensor(self.label)[idx]
 
-print(temp)
-# file_data = OrderedDict()
+        return x_data, y_label
+    
+    def __len__(self):
+        return len(self.data)
 
-# file_data["name"] = "hello"
-# file_data["language"] = "kor"
-# file_data["words"] = {"ram" : "hello9", "cupu" : "nvidia"}
-# file_data["temp"] = 4
+train_data, label_data = np.load("data/aloi/N_train.npy"), np.load("data/aloi/y_train.npy") 
+# print(np.shape(train_data), np.shape(label_data))
+custom_dataset = npy_dataset(data = train_data, label = label_data)
+train_dataloader = DataLoader(custom_dataset, batch_size = int(224), pin_memory = True)
+for i, t in train_dataloader:
+    print(i.size(), t.size())
+# temp, temp_1 = next(iter(custom_dataset))
+# print(Tensor(temp).size(), Tensor(temp_1).size())
 
-# with open("word.json", "w", encoding = "utf-8") as make_file:
-#     json.dump(file_data, make_file, ensure_ascii = False, indent = "\t")
-# X_train, Y_train = np.load("data/aloi/N_train.npy"), np.load("data/aloi/y_train.npy")
-# print(np.shape(X_train), np.shape(Y_train))
-# X_split_train, X_split_valid, y_split_train, Y_split_valid = train_test_split(X_train, Y_train, test_size = 0.15)
-# print(np.shape(X_split_train), np.shape(X_split_valid), np.shape(y_split_train), np.shape(Y_split_valid))
-
-# data_paths = "data"
-# data_folders = os.listdir("data")
-
+print(np.shape(train_data), np.shape(train_data[[1, 2, 3]]))
 
 # # with open("run.yaml") as f:
 # #         config = yaml.load(f, Loader = yaml.FullLoader)

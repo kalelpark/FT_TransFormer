@@ -15,16 +15,15 @@ You could load the datasets with the following commands:
 
 ``` bash
 conda activate tdl
-cd $PROJECT_DIR
-wget "https://www.dropbox.com/s/cj9ex11u6ri0tdy/tabular-pretrains-data.tar?dl=1" -O tabular-pretrains-data.tar
-tar -xvf tabular-pretrains-data.tar
+cd $Researh
+wget "https://www.dropbox.com/s/o53umyg6mn3zhxy/data.tar.gz?dl=1" -O rtdl_data.tar.gz
+tar -zvf rtdl_data.tar.gz
 ```
-
 
 
 **Setup the enviroment for train**
 
-```
+```bash
 $cd Researh
 $sh experiment.sh 
 ```

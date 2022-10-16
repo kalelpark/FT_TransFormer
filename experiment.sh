@@ -9,7 +9,7 @@
 # If you any Question, leave an Issue.
 
 # TIP!
-python main.py --action train --model fttransformer --datapath data/microsoft --savepath output/
+python main.py --action train --model fttransformer --data microsoft --savepath output
 
 # ResNet
 # python main.py --action train --model resnet --datapath data/microsoft --savepath output/

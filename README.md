@@ -5,7 +5,7 @@
 **For paper implementations, see the section ["Papers and projects"](#papers-and-projects).**
 
 ## Results
-You access `Output/Model/data/default/info.json`. This file show model, accuracy, rmse etc.. check
+We saved test information in `"Output/[model]/data/default/info.json"`. Check it Out!
 
 ## Datasets
 

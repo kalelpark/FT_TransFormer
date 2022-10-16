@@ -17,32 +17,27 @@ from collections import OrderedDict
 def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
 
     """
-    args have device info (CPU, GPU, etc..) if you modfiy info, check main.py
-    config have train & test info (lr, optim, model) in the form Dictionary.
-    check run.yaml File.  
+    args have device info (CPU, GPU, etc..), data, path [check main.py File].
+    (Default Model using torcn.nn.parallel.) 
+    config have model parameters and model info. check model.yaml.  
     - If you question or Error, leave an Issue.
     """
-    data_folders = sorted(os.listdir(config["data_path"]))
-    for data_folder in data_folders:
 
-        if int(config["fold"]) > 0:
-            pass
-        else:
-            wandb.init( name = config["model"] + '-' + config["lr"], 
-                        project = data_folder + '_' + args.action + '_' + config["description"])
-            wandb.config = config
-        
-        data_path = os.path.join(config["data_path"], data_folder)
-        train_dict, val_dict, test_dict, info_dict = load_dataset(data_path)
-        print("loaded Dataset..")
+    wandb.init( name = config["model"], 
+                project = config["model"] + '_' + args.data)
+    wandb.config = config
+    
+    train_dict, val_dict, test_dict, info_dict = load_dataset(args.data_path)
+    print("loaded Dataset..")
 
-        model = load_model(config, info_dict)
-        print("loaded Model..")
-        
-        optimizer = get_optimizer(model, config)
-        loss_fn = get_loss(info_dict)
-        loss_fn.to(args.device)
-        print("loaded optimizer and loss..")
+    model = load_model(config, info_dict)           # Update!! 
+    print("loaded Model..")
+      
+    optimizer = (get_optimizer(model, config))
+    loss_fn = (get_loss(info_dict))
+    loss_fn.to(args.device)
+
+    print("loaded optimizer and loss..")
 
         if int(config["fold"]) > 0:
             print("Fold Training..")

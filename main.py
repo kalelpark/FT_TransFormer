@@ -12,15 +12,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", type = str, required = True)
     parser.add_argument("--model", type = str, required = True)
-    parser.add_argument("--datapath", type = str, required = True)
+    parser.add_argument("--data", type = str, required = True)
     parser.add_argument("--savepath", type = str, required = True)
     args = parser.parse_args()
     
+    args.data_path = os.path.join("data", args.data)
     args.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    with open("run.yaml") as f:
-        config = yaml.load(f, Loader = yaml.FullLoader)[args.action]
+    with open("model.yaml") as f:
+        config = yaml.load(f, Loader = yaml.FullLoader)[args.model]
     if args.action == "train":
         model_train(args, config)
-    else: # next time I'll make ensemble.
+    else: # LATER UPDATE
         model_infer(args, config)

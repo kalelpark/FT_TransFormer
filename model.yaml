@@ -1,9 +1,8 @@
 # Yaml file get Model Parameter and Architecture
 fttransformer: 
-  parallel : 1
   model : ft-transformer
   optim : AdamW
-  lr : 1e-3
+  lr : 1e-4
   weight_decay : 1e-5
   batchsize : 256
   epochs : 80
@@ -13,7 +12,8 @@ fttransformer:
 
 resnet:
   batchsize : 256
-  model : ft-transformer
-  saved_model_path : 
+  model : resnet
+  lr : 1e-3
+  weight_decayt : 0
 
   description: Training DL model [ ResNet ] for Tabular Data

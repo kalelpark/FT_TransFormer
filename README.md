@@ -4,8 +4,18 @@
 
 **For paper implementations, see the section ["Papers and projects"](#papers-and-projects).**
 
+## Setup the enviroment for evaluation
+
+```bash
+$cd Researh
+$sh experiment.sh 
+```
+
+## Single
+Single train. in `"python main.py --action train --model fttransformer --data microsoft --savepath output"`.
+
 ## Results
-We saved test information in `"Output/[model]/data/default/info.json"`. Check it Out!
+We saved reult information in `"Output/model_name/data/default/info.json"`.
 
 ## Datasets
 
@@ -20,13 +30,6 @@ wget "https://www.dropbox.com/s/o53umyg6mn3zhxy/data.tar.gz?dl=1" -O rtdl_data.t
 tar -zvf rtdl_data.tar.gz
 ```
 
-
-**Setup the enviroment for train**
-
-```bash
-$cd Researh
-$sh experiment.sh 
-```
 
 **File Structure**
 ```
@@ -58,6 +61,5 @@ etc..
 
 | Name                                                          | Location                                                        | Comment        |
 | :------------------------------------------------------------ | :-------------------------------------------------------------- | :------------- |
-| Revisiting Pretrarining Objectives for Tabular Deep Learning  | [link](https://github.com/puhsu/tabular-dl-pretrain-objectives) | arXiv 2022     |
-| On Embeddings for Numerical Features in Tabular Deep Learning | [link](https://github.com/Yura52/tabular-dl-num-embeddings)     | arXiv 2022     |
-| `rtdl`                                                        | [link](https://github.com/Yura52/rtdl)                          | Python package |
+| Revisiting Pretrarining Objectives for Tabular Deep Learning  | [link](https://arxiv.org/abs/2207.03208) | arXiv 2022     |
+| On Embeddings for Numerical Features in Tabular Deep Learning | [link](https://arxiv.org/abs/2203.05556)     | arXiv 2022     |

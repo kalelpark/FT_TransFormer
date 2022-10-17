@@ -8,3 +8,4 @@ utils.py
 output
 wandb
 __pycache__
+model_check.py

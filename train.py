@@ -9,7 +9,7 @@ import numpy as np
 from dataset import *
 from utils import *
 from metrics import *
-from model import load_model
+from model.common import *
 from sklearn.model_selection import KFold, StratifiedKFold
 import wandb
 from collections import OrderedDict
@@ -22,43 +22,38 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     config have model parameters and model info. check model.yaml.  
     - If you question or Error, leave an Issue.
     """
+    
+    train_dict, val_dict, test_dict, info_dict = load_dataset(args.data_path)
+    print("loaded Dataset..")
+    model = load_model(config, info_dict)           
+    print("loaded Model..")
 
     wandb.init( name = config["model"], 
                 project = config["model"] + '_' + args.data)
     wandb.config = config
-    
-    train_dict, val_dict, test_dict, info_dict = load_dataset(args.data_path)
-    print("loaded Dataset..")
-
-    model = load_model(config, info_dict)           # Update!! 
-    print("loaded Model..")
       
     optimizer = (get_optimizer(model, config))
     loss_fn = (get_loss(info_dict))
-    loss_fn.to(args.device)
+    loss_fn.to(args.device)    
 
     print("loaded optimizer and loss..")
 
-        if int(config["fold"]) > 0:
-            print("Fold Training..")
-            kf = KFold(get_splits = 15)
-            for idxx, (train_idx, temp_idx) in enumerate(kf.split(train_dict["N_train"], train_dict["y_train"])):  # X_train, X_temp, y_train, y_temp = 
-                fold_train_dict = {}
-                fold_train_dict["N_train"] = train_dict["N_train"][train_idx]
-                fold_train_dict["y_train"] = train_dict["y_train"][train_idx]
-                train_dataloader, valid_dataloader = get_DataLoader(fold_train_dict, val_dict, config)
-        else:
-            """
-            Default : Singe Training
-            """
-            print("Single[default] Training..")
-            train_dataloader, valid_dataloader = get_DataLoader(train_dict, val_dict, config)
-            model_run(model, optimizer, loss_fn, data_folder, train_dataloader, valid_dataloader, info_dict, args, config)
+    if int(config["fold"]) > 0:     # fold
+        print("Fold Training..")
+        kf = KFold(get_splits = 15)
+        for idxx, (train_idx, temp_idx) in enumerate(kf.split(train_dict["N_train"], train_dict["y_train"])):  # X_train, X_temp, y_train, y_temp = 
+            fold_train_dict = {}
+            fold_train_dict["N_train"] = train_dict["N_train"][train_idx]
+            fold_train_dict["y_train"] = train_dict["y_train"][train_idx]
+            train_dataloader, valid_dataloader = get_DataLoader(fold_train_dict, val_dict, config)
+    else:   # Default 
+        print("Single[default] Training..")
+        train_dataloader, valid_dataloader = get_DataLoader(train_dict, val_dict, config)
+        model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, info_dict, args, config)
                 
-def model_run(  model, optimizer, 
-                loss_fn, data_name : str,
-                train_dataloader, valid_dataloader, info_dict,
-                 args : ty.Any, config : ty.Dict[str, ty.List[str]]) ->ty.List[float]:
+def model_run(  model, optimizer, loss_fn, data_name : str,
+                train_dataloader, valid_dataloader, info_dict : ty.Dict[str : int],
+                args : ty.Any, config : ty.Dict[str, ty.List[str]]) ->ty.List[float]:
 
     """
     if you change any options, you will see model_train function, and run.yaml File
@@ -66,14 +61,14 @@ def model_run(  model, optimizer,
     and make json_file to see info trained_model score. score get train, valid accuracy
     - If you question or Error, leave an Issue.
     """
-    
+
     json_info = OrderedDict()
     model.to(args.device)
     # wandb.watch(model)
     method =  "ensemble" if config["fold"] > 0 else "default"
-    info_save_path = os.path.join(config["output_path"], config["model"], data_name, method)
+    json_info_save_path = os.path.join(args.savepath, args.model, args.data, method) # 저장 경로 설정
     print("start_training..")
-    loss_fn
+
     for epoch in range(config["epochs"]):
         train_loss_score, valid_loss_score = 0, 0
         if info_dict["task_type"] == "regression":

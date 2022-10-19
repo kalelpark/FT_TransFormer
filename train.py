@@ -86,12 +86,6 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             
             train_pred = np.append(train_pred, y_pred.cpu().detach().numpy())
             train_label = np.append(train_label, y_label.cpu().detach().numpy())
-
-
-        if dataset_info_dict["task_type"] == "regression":
-            train_score = get_rmse_score(train_pred, train_label)
-        else:
-            train_score = get_accuracy_score(train_pred, train_pred)
         
         model.eval()
         for X_data, y_label in valid_dataloader:
@@ -102,11 +96,7 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
         
         if dataset_info_dict["task_type"] == "regression":
-            valid_score = get_rmse_score(valid_pred, valid_label)
-        else:
-            valid_score = get_accuracy_score(valid_pred, valid_label)
-        
-        if dataset_info_dict["task_type"] == "regression":
+            train_score, valid_score = get_rmse_score(train_pred, train_label), get_rmse_score(valid_pred, valid_label)
             if best_valid > valid_score:
                 best_valid = valid_score
 
@@ -115,8 +105,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
                 json_info["valid_accuracy"] = valid_score
                 json_info["task_name"] = dataset_info_dict["task_type"]
                 save_mode_with_json(model, json_info,config, json_info_output_path)
-        
         else:
+            train_score, valid_score = get_accuracy_score(train_pred, train_pred), get_accuracy_score(valid_pred, valid_label)
             if best_valid < valid_score:
                 best_valid = valid_score
                 
@@ -125,7 +115,7 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
                 json_info["valid_accuracy"] = valid_score
                 json_info["task_name"] = dataset_info_dict["task_type"]
                 save_mode_with_json(model, json_info,config, json_info_output_path)
-
+        
         wandb.log({
             "train_score" : train_score,
             "valid_score" : valid_score,

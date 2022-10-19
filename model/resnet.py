@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim
 from torch import Tensor
-from common import *
+from .common import *
 
 ModuleType = Union[str, Callable[..., nn.Module]]
 

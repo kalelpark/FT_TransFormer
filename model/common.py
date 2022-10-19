@@ -11,8 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim
 from torch import Tensor
-from fttransformer import FTTransformer
-from resnet import ResNet
+from .fttransformer import FTTransformer
+from .resnet import ResNet
 
 ModuleType = Union[str, Callable[..., nn.Module]]
 

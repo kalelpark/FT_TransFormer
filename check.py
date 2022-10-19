@@ -7,13 +7,24 @@ import json
 from collections import OrderedDict
 from torch.utils.data import Dataset, DataLoader
 
-with open("data/aloi/info.json", "r") as f:
-        info_dict = json.load(f)
+# with open("data/aloi/info.json", "r") as f:
+#         info_dict = json.load(f)
 
+info_dict = dict()
 info_dict["wongi"] = "helllooo"
 
 print(info_dict)
-        
+
+with open("qqqqq/temp", "w", encoding = "utf-8") as make_file:
+        json.dump(info_dict, make_file, ensure_ascii = False, indent = "\t")
+
+# temp = np.array(1)
+# temp
+# print(temp)
+# a = np.array([1, 2, 3])
+# print(np.shape(a))
+
+# print
 
 # class npy_dataset(Dataset):
 #     def __init__(self, data, label):

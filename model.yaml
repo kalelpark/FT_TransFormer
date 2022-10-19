@@ -17,14 +17,17 @@ fttransformer:
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 
 resnet:
-  batchsize : 256
   model : resnet
+  optim : AdamW
   lr : 1e-3
-  weight_decayt : 0
+  weight_decay : 0
+  batchsize : 1024
+  epochs : 80
+  fold : 0
   d_main : 128
   d_hidden : 4
+  n_blocks : 2
   dropout_first : 0.2
   dropout_second : 0.0
-  n_blocks : 2
 
   # description: Training DL model [ ResNet ] for Tabular Data

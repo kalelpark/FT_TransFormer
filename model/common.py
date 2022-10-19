@@ -49,14 +49,14 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                             residual_dropout= float(config["residual_dropout"]),
                             d_out= 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]),
                         )
-    elif config["resnet"] == "resnet":
+    elif config["model"] == "resnet":
         return ResNet.make_baseline(
                         d_in = int(info_dict["n_num_features"]),
+                        n_blocks = int(config["n_blocks"]),
                         d_main = int(config["d_main"]),
                         d_hidden = int(config["d_hidden"]),
-                        dropout_first = float(config["d_hidden"]),
+                        dropout_first = float(config["dropout_first"]),
                         dropout_second = float(config["dropout_second"]),
-                        n_blocks = int(config["n_blocks"]),
                         d_out= 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]),
                     )
     else:

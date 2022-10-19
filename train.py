@@ -32,13 +32,12 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
                 project = config["model"] + '_' + args.data)
     wandb.config = config
       
-    optimizer = (get_optimizer(model, config))
-    loss_fn = (get_loss(dataset_info_dict))
-    loss_fn.to(args.device)    
+    optimizer = get_optimizer(model, config)
+    loss_fn = get_loss(dataset_info_dict)
 
     print("loaded optimizer and loss..")
 
-    if int(config["fold"]) > 0:     # fold
+    if int(config["fold"]) > 2:     # fold
         print("Fold Training..")
         kf = KFold(get_splits = 15)
         for idxx, (train_idx, temp_idx) in enumerate(kf.split(train_dict["N_train"], train_dict["y_train"])):  # X_train, X_temp, y_train, y_temp = 
@@ -49,7 +48,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     else:   # Default 
         print("Single[default] Training..")
         train_dataloader, valid_dataloader, test_dataloader = get_DataLoader(train_dict, val_dict, test_dict, config)
-        model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, test_dict, args, config)
+        model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config)
 
 ## 10.19
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config):
@@ -57,9 +56,9 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
     json_info = OrderedDict()
     model.to(args.device)
     method = "ensemble" if config["fold"] > 0 else "default"
-    json_info_output_path = os.path.join(args.output, config["model"], method)
+    json_info_output_path = os.path.join(str(args.savepath), config["model"], str(args.data),method)
 
-    print("Starting..")
+    print("Ready to run model...")
 
     # Best Score
     if dataset_info_dict["task_type"] == "regression":  # RMSE
@@ -70,8 +69,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
     for epoch in range(int(config["epochs"])):
         train_loss_score, valid_loss_score = 0, 0
 
-        train_pred, valid_pred = list(), list()
-        train_label, valid_label = list(), list()
+        train_pred, valid_pred = np.array([]), np.array([])
+        train_label, valid_label = np.array([]), np.array([])
 
         model.train()
         for X_data, y_label in train_dataloader:        # training
@@ -79,15 +78,15 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             # FT_Transformer, ResNet
             y_pred = model(X_data)
+            loss = loss_fn(y_pred.squeeze(1), y_label)
             
-            loss = loss_fn(y_pred, y_label)
             loss.backward()
-            
             optimizer.step()
             train_loss_score += loss.item()
             
-            train_pred.extend(y_pred)
-            train_label.extend(y_label)
+            train_pred = np.append(train_pred, y_pred.cpu().detach().numpy())
+            train_label = np.append(train_label, y_label.cpu().detach().numpy())
+
 
         if dataset_info_dict["task_type"] == "regression":
             train_score = get_rmse_score(train_pred, train_label)
@@ -99,8 +98,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             y_pred = model(X_data)
 
-            valid_pred.extend(y_pred)
-            valid_label.extend(y_label)
+            valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
+            valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
         
         if dataset_info_dict["task_type"] == "regression":
             valid_score = get_rmse_score(valid_pred, valid_label)

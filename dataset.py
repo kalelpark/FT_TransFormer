@@ -21,22 +21,25 @@ class npy_dataset(Dataset):
         return len(self.data)
 
 def get_DataLoader( train_data : ty.Dict[str, np.ndarray], 
-                    valid_data : ty.Dict[str, np.ndarray], 
+                    valid_data : ty.Dict[str, np.ndarray],
+                    test_data : ty.Dict[str, np.ndarray],
                     config):
 
     """
-    train_data, and default valid_data, you can change batch_size.
+    train_data, valid_data,test_data you can change batch_size.
     checking about run.yaml file. config is default.
     - If you question or Error, leave an Issue.
     """ 
     
     train_dataset = npy_dataset(train_data["N_train"], train_data["y_train"])
     valid_dataset = npy_dataset(valid_data["N_val"], valid_data["y_val"])
+    test_dataset = npy_dataset(test_data["N_test"], test_data["y_test"])
     
     train_dataloader = DataLoader(train_dataset, batch_size = int(config["batchsize"]), pin_memory = True)
     valid_dataloader = DataLoader(valid_dataset, batch_size = int(config["batchsize"]), pin_memory = True)
+    test_dataloader = DataLoader(test_dataset, batch_size = int(config["batchsize"]), pin_memory = True)
     
-    return train_dataloader, valid_dataloader
+    return train_dataloader, valid_dataloader, test_dataloader
 
 
 def load_dataset(data_path : str) ->  ty.List[ty.Dict[str, str]]:

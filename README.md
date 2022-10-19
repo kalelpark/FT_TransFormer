@@ -11,8 +11,8 @@ $cd Researh
 $sh experiment.sh 
 ```
 
-## Single
-Single train. in `"python main.py --action train --model fttransformer --data microsoft --savepath output"`.
+## Default
+Default inference. in `"python main.py --action train --model fttransformer --data microsoft --savepath output"`.
 
 ## Results
 We saved reult information in `"Output/model_name/data/default/info.json"`.

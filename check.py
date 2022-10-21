@@ -7,16 +7,20 @@ import json
 from collections import OrderedDict
 from torch.utils.data import Dataset, DataLoader
 
+number = 123
+task_type = "binary"
+d_out= 1 if task_type == "regression" else 109 if task_type == "multiclass" else 2
+print(d_out)
 # with open("data/aloi/info.json", "r") as f:
 #         info_dict = json.load(f)
 
-with open("model.yaml") as f:
-        config = yaml.load(f, Loader = yaml.FullLoader)
-        config["fttransformer"]["valid_score"] = 123
-        config["fttransformer"]["ttrain_score"] = 123
-        config["fttransformer"]["test_score"] = 123
-        with open("tetetete", "w", encoding = "utf-8") as make_file:
-                json.dump(config["fttransformer"], make_file, ensure_ascii = False, indent = "\t")
+# with open("model.yaml") as f:
+#         config = yaml.load(f, Loader = yaml.FullLoader)
+#         config["fttransformer"]["valid_score"] = 123
+#         config["fttransformer"]["ttrain_score"] = 123
+#         config["fttransformer"]["test_score"] = 123
+#         with open("tetetete", "w", encoding = "utf-8") as make_file:
+#                 json.dump(config["fttransformer"], make_file, ensure_ascii = False, indent = "\t")
 
 
 # info_dict = dict()

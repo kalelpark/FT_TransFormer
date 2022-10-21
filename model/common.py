@@ -47,7 +47,7 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                             ffn_d_hidden = int(config["ffn_d_hidden"]),
                             ffn_dropout = float(config["ffn_dropout"]),
                             residual_dropout= float(config["residual_dropout"]),
-                            d_out= 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]),
+                            d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
                         )
     elif config["model"] == "resnet":
         return ResNet.make_baseline(
@@ -57,7 +57,7 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                         d_hidden = int(config["d_hidden"]),
                         dropout_first = float(config["dropout_first"]),
                         dropout_second = float(config["dropout_second"]),
-                        d_out= 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]),
+                        d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
                     )
     else:
         pass

@@ -4,7 +4,7 @@ fttransformer:
   optim : AdamW
   lr : 1e-4
   weight_decay : 1e-5
-  batchsize : 256
+  batchsize : 4048
   epochs : 80
   fold : 0
   d_token :  8
@@ -21,7 +21,7 @@ resnet:
   optim : AdamW
   lr : 1e-3
   weight_decay : 0
-  batchsize : 1024
+  batchsize : 4048
   epochs : 80
   fold : 0
   d_main : 128

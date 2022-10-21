@@ -61,8 +61,8 @@ def load_dataset(data_path : str) ->  ty.List[ty.Dict[str, str]]:
 
     train_dict = {}
     val_dict = {}
-    test_dict = {}
-    N_train_data, y_train_data = np.load(os.path.join(data_path, N_train)), np.load(os.path.join(data_path, y_train))
+    test_dict = {} 
+    N_train_data, y_train_data = np.load(os.path.join(data_path, N_train)), np.load(os.path.join(data_path, y_train))    
     train_dict["N_train"] = N_train_data
     train_dict["y_train"] = y_train_data
 

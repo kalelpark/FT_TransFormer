@@ -19,7 +19,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     """
     args have device info (CPU, GPU, etc..), data, path [check main.py File].
     (Default Model using torcn.nn.parallel.) 
-    config have model parameters and model info. check model.yaml.  
+    config have model parameters and model info. check model.yaml. 
     - If you question or Error, leave an Issue.
     """
 
@@ -50,8 +50,8 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
         print("Single[default] Training..")
         train_dataloader, valid_dataloader, test_dataloader = get_DataLoader(train_dict, val_dict, test_dict, config)
         model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config)
-
-## 10.19
+   
+## 10.19 # based_on resnet
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config):
 
     model.to(args.device)
@@ -68,15 +68,18 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
     for epoch in range(int(config["epochs"])):
         train_loss_score, valid_loss_score = 0, 0
 
-        train_pred, valid_pred = np.array([]), np.array([])
-        train_label, valid_label = np.array([]), np.array([])
+        train_pred, valid_pred, test_pred = np.array([]), np.array([]), np.array([])
+        train_label, valid_label, test_label = np.array([]), np.array([]), np.array([])
 
-        model.train()
-        for X_data, y_label in train_dataloader:        # training
+        model.train()       # train about ResNet
+        for X_data, y_label in train_dataloader:        # Train
             optimizer.zero_grad()
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
+            
             # FT_Transformer, ResNet
-            y_pred = model(X_data)
+            # y_pred = model(X_data)
+            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
+
             loss = loss_fn(y_pred.squeeze(1), y_label)
             
             loss.backward()
@@ -86,31 +89,48 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             train_pred = np.append(train_pred, y_pred.cpu().detach().numpy())
             train_label = np.append(train_label, y_label.cpu().detach().numpy())
         
-        model.eval()
-        for X_data, y_label in valid_dataloader:
+        model.eval()        # Valid about ResNet
+        for X_data, y_label in valid_dataloader:        # Valid
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            y_pred = model(X_data)
+
+            # y_pred = model(X_data)
+            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
 
             valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
             valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
+
+        model.eval()
+        for X_data, y_label in test_dataloader:         # Test
+            X_data, y_label = X_data.to(args.device), y_label.to(args.device)
+
+            # y_pred = model(X_data)
+            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
+            test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
+            test_label = np.append(test_label, y_label.cpu().detach().numpy())            
         
         if dataset_info_dict["task_type"] == "regression":
             train_score, valid_score = get_rmse_score(train_pred, train_label), get_rmse_score(valid_pred, valid_label)
+
             if best_valid > valid_score:
                 best_valid = valid_score
-
-                config[config["model"]]["valid_accuracy"] = valid_score
+                test_score = get_rmse_score(test_pred, test_label)
+                config["valid_rmse"] = valid_score
+                config["test_rmse"] = test_score
                 save_mode_with_json(model, config, json_info_output_path)
         else:
             train_score, valid_score = get_accuracy_score(train_pred, train_pred), get_accuracy_score(valid_pred, valid_label)
+
             if best_valid < valid_score:
                 best_valid = valid_score
-                
-                config[config["model"]]["valid_accuracy"] = valid_score
+                test_score = get_accuracy_score(test_pred, test_label)
+
+                config["valid_accuracy"] = valid_score
+                config["test_accuracy"] = test_score
                 save_mode_with_json(model, config, json_info_output_path)
         
         wandb.log({
             "train_score" : train_score,
+            "train_loss" : train_loss_score,
             "valid_score" : valid_score,
-            "train_loss" : train_loss_score
+            "test_score" : test_score
         })

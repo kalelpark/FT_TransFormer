@@ -39,13 +39,13 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
     if config["model"] == "ft-transformer":
         return FTTransformer.make_baseline(
                             # Example
-                            n_num_features= int(info_dict["n_num_features"]),
+                            n_num_features = int(info_dict["n_num_features"]),
                             cat_cardinalities= None,
                             d_token = int(config["d_token"]),
                             n_blocks = int(config["n_blocks"]),
                             attention_dropout = float(config["attention_dropout"]),
                             ffn_d_hidden = int(config["ffn_d_hidden"]),
-                            ffn_dropout = float(config["ffn_d_dropout"]),
+                            ffn_dropout = float(config["ffn_dropout"]),
                             residual_dropout= float(config["residual_dropout"]),
                             d_out= 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]),
                         )

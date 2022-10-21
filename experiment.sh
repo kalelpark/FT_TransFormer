@@ -9,10 +9,10 @@
 # If you any Question, leave an Issue.
 
 # TIP!
-# python main.py --action train --model fttransformer --data microsoft --savepath output
+# python main.py --action train --model resnet --data microsoft --savepath output
 
 # ResNet
-# python main.py --action train --model resnet --datapath data/microsoft --savepath output/
+# python main.py --action train --model resnet --data microsoft --savepath output
 
 # XGBoost (Later Update!)
-python main.py --action train --model resnet --datapath data/microsoft --savepath output/
+# python main.py --action train --model resnet --datapath data/microsoft --savepath output/

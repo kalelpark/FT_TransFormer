@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim
 from torch import Tensor
 from .common import *
+
 """
     Model for FTTransformer
 
@@ -34,6 +35,24 @@ from .common import *
 """
 
 ModuleType = Union[str, Callable[..., nn.Module]]
+
+def reglu(x : Tensor) -> Tensor:
+    assert x.shape[-1] % 2 == 0
+    a, b = x.chunk(2, dim = -1)
+    return a * F.relu(b)
+
+def geglu(x : Tensor) -> Tensor:
+    assert x.shape[-1] % 2 == 0
+    a, b = x.chunk(2, dim = -1)
+    return a * F.gelu(b)
+
+class ReGLU(nn.Module):
+    def forward(self, x : Tensor) -> Tensor:
+        return reglu(x)
+
+class GEGLU(nn.Module):
+    def forward(self, x : Tensor) -> Tensor:
+        return geglu(x)
 
 def _all_or_none(values):
     return all(x is None for x in values) or all(x is not None for x in values)

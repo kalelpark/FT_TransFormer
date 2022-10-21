@@ -22,9 +22,10 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     config have model parameters and model info. check model.yaml.  
     - If you question or Error, leave an Issue.
     """
-    
+
     train_dict, val_dict, test_dict, dataset_info_dict = load_dataset(args.data_path)
     print("loaded Dataset..")
+
     model = common.load_model(config, dataset_info_dict)           
     print("loaded Model..")
 
@@ -34,7 +35,6 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
       
     optimizer = get_optimizer(model, config)
     loss_fn = get_loss(dataset_info_dict)
-
     print("loaded optimizer and loss..")
 
     if int(config["fold"]) > 2:     # fold
@@ -45,6 +45,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
             fold_train_dict["N_train"] = train_dict["N_train"][train_idx]
             fold_train_dict["y_train"] = train_dict["y_train"][train_idx]
             train_dataloader, valid_dataloader, test_dataloader = get_DataLoader(fold_train_dict, val_dict, test_dict, config)
+
     else:   # Default 
         print("Single[default] Training..")
         train_dataloader, valid_dataloader, test_dataloader = get_DataLoader(train_dict, val_dict, test_dict, config)
@@ -52,12 +53,10 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
 
 ## 10.19
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config):
-    
-    json_info = OrderedDict()
+
     model.to(args.device)
     method = "ensemble" if config["fold"] > 0 else "default"
     json_info_output_path = os.path.join(str(args.savepath), config["model"], str(args.data),method)
-
     print("Ready to run model...")
 
     # Best Score
@@ -100,21 +99,15 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             if best_valid > valid_score:
                 best_valid = valid_score
 
-                json_info["model"] = config["model"]
-                json_info["epochs"] = config["epochs"]
-                json_info["valid_accuracy"] = valid_score
-                json_info["task_name"] = dataset_info_dict["task_type"]
-                save_mode_with_json(model, json_info,config, json_info_output_path)
+                config[config["model"]]["valid_accuracy"] = valid_score
+                save_mode_with_json(model, config, json_info_output_path)
         else:
             train_score, valid_score = get_accuracy_score(train_pred, train_pred), get_accuracy_score(valid_pred, valid_label)
             if best_valid < valid_score:
                 best_valid = valid_score
                 
-                json_info["model"] = config["model"]
-                json_info["epochs"] = config["epochs"]
-                json_info["valid_accuracy"] = valid_score
-                json_info["task_name"] = dataset_info_dict["task_type"]
-                save_mode_with_json(model, json_info,config, json_info_output_path)
+                config[config["model"]]["valid_accuracy"] = valid_score
+                save_mode_with_json(model, config, json_info_output_path)
         
         wandb.log({
             "train_score" : train_score,

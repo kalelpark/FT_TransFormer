@@ -10,13 +10,22 @@ from torch.utils.data import Dataset, DataLoader
 # with open("data/aloi/info.json", "r") as f:
 #         info_dict = json.load(f)
 
-info_dict = dict()
-info_dict["wongi"] = "helllooo"
+with open("model.yaml") as f:
+        config = yaml.load(f, Loader = yaml.FullLoader)
+        config["fttransformer"]["valid_score"] = 123
+        config["fttransformer"]["ttrain_score"] = 123
+        config["fttransformer"]["test_score"] = 123
+        with open("tetetete", "w", encoding = "utf-8") as make_file:
+                json.dump(config["fttransformer"], make_file, ensure_ascii = False, indent = "\t")
 
-print(info_dict)
 
-with open("qqqqq/temp", "w", encoding = "utf-8") as make_file:
-        json.dump(info_dict, make_file, ensure_ascii = False, indent = "\t")
+# info_dict = dict()
+# info_dict["wongi"] = "helllooo"
+
+# print(info_dict)
+
+# with open("qqqqq/temp", "w", encoding = "utf-8") as make_file:
+#         json.dump(info_dict, make_file, ensure_ascii = False, indent = "\t")
 
 # temp = np.array(1)
 # temp
@@ -51,10 +60,8 @@ with open("qqqqq/temp", "w", encoding = "utf-8") as make_file:
 
 # print(np.shape(train_data), np.shape(train_data[[1, 2, 3]]))
 
-# # with open("run.yaml") as f:
-# #         config = yaml.load(f, Loader = yaml.FullLoader)
-# #         print(config["train"])
-# #         print(config["path"])
+
+
 
 
 # for data_folder in data_folders:

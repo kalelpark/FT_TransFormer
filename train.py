@@ -29,7 +29,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     model = common.load_model(config, dataset_info_dict)           
     print("loaded Model..")
 
-    wandb.init( name = config["model"], 
+    wandb.init( name = config["model"] + "_" + str(config["count"]), 
                 project = config["model"] + '_' + args.data)
     wandb.config = config
       

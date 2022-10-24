@@ -17,7 +17,7 @@ def save_mode_with_json(model,config : ty.Dict[int ,ty.List[str]], save_path : s
     with open(os.path.join(save_path,"info_dict" + str(config["count"]) + ".json"), "w", encoding = "utf-8") as make_file: # .json으로 수정 필요
         json.dump(config, make_file, ensure_ascii = False, indent = "\t")
 
-    torch.save(model.state_dict(), os.path.join(save_path, config["model"]) + "_" + config["count"]+ ".pt")
+    torch.save(model.state_dict(), os.path.join(save_path, config["model"]) + "_" + str(config["count"]) + ".pt")
     # if config["model"] == "resnet":
     #     torch.save(model.state_dict(), os.path.join(save_path, config["model"]) + ".pt")
     # else:

@@ -15,7 +15,7 @@ python main.py --action train --model fttransformer --data microsoft --savepath 
 #                                                                                               // Binary Label
 
 # ResNet
-python main.py --action train --model resnet --data microsoft --savepath output               # // Regression
+# python main.py --action train --model resnet --data microsoft --savepath output               # // Regression
 # python main.py --action train --model resnet --data aloi --savepath output               // Multi Label
 # python main.py --action train --model resnet --data epsilon --savepath output               // Binary Label
 

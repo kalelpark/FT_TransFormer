@@ -8,12 +8,12 @@ fttransformer:
   epochs : 80
   fold : 0
   d_token :  8
-  n_blocks : 16
+  n_blocks : 8
   attention_dropout : 0.2
   ffn_d_hidden : 6
   ffn_dropout : 0.2
   residual_dropout : 0.0
-  count : 1
+  count : 2
 
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data

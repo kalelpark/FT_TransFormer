@@ -1,4 +1,4 @@
-# Research on Tabular Deep Learning
+# Research on Tabular Deep Learning Model
 
 **This Project training 8 files at once as a Tabular Deep Learning model and stores Experimental results. additionaly use wandb.**
 
@@ -12,10 +12,10 @@ $sh experiment.sh
 ```
 
 ## Default
-Default inference. in `"python main.py --action train --model fttransformer --data microsoft --savepath output"`.
+Default inference. in `python main.py --action train --model fttransformer --data microsoft --savepath output`.
 
 ## Results
-We saved reult information in `"Output/model_name/data/default/info.json"`.
+We saved reult information in `Output/model_name/data/default/info.json`.
 
 ## Datasets
 
@@ -56,6 +56,16 @@ tar -zvf rtdl_data.tar.gz
 ├── utils.py
 etc..
 ``` 
+## How to cite
+```
+@article = {
+    title = {Research on Tabular Deep Learning Model},
+    author = {Wongi Park},
+    journal = {GitHub},
+    url = {https://github.com/kalelpark/DeepLearning-for-Tabular-Data},
+    year = {2022},
+}
+```
 
 ## Papers and projects
 
@@ -63,3 +73,5 @@ etc..
 | :------------------------------------------------------------ | :-------------------------------------------------------------- | :------------- |
 | Revisiting Pretrarining Objectives for Tabular Deep Learning  | [link](https://arxiv.org/abs/2207.03208) | arXiv 2022     |
 | On Embeddings for Numerical Features in Tabular Deep Learning | [link](https://arxiv.org/abs/2203.05556)     | arXiv 2022     |
+
+

@@ -23,7 +23,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
     - If you question or Error, leave an Issue.
     """
 
-    train_dict, val_dict, test_dict, dataset_info_dict = load_dataset(args.data_path)
+    train_dict, val_dict, test_dict, dataset_info_dict, d_out = load_dataset(args.data_path)
     print("loaded Dataset..")
 
     model = common.load_model(config, dataset_info_dict)           
@@ -50,13 +50,13 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
         print("Single[default] Training..")
         train_dataloader, valid_dataloader, test_dataloader = get_DataLoader(train_dict, val_dict, test_dict, config)
         model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config)
-   
-## 10.19 # based_on resnet
+
+# 
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config):
 
     model.to(args.device)
     method = "ensemble" if config["fold"] > 0 else "default"
-    json_info_output_path = os.path.join(str(args.savepath), config["model"], str(args.data),method)
+    json_info_output_path = os.path.join(str(args.savepath), config["model"], str(args.data), method)
     print("Ready to run model...")
 
     # Best Score
@@ -74,10 +74,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
         model.train()       # train about ResNet
         for X_data, y_label in train_dataloader:        # Train
             optimizer.zero_grad()
+
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            
-            # FT_Transformer, ResNet
-            # y_pred = model(X_data)
             y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
 
             loss = loss_fn(y_pred.squeeze(1), y_label)
@@ -91,9 +89,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
         
         model.eval()        # Valid about ResNet
         for X_data, y_label in valid_dataloader:        # Valid
-            X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-
-            # y_pred = model(X_data)
+            
+            X_data, y_label = X_data.to(args.device), y_label.to(args.device) 
             y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
 
             valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
@@ -101,10 +98,10 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
 
         model.eval()
         for X_data, y_label in test_dataloader:         # Test
-            X_data, y_label = X_data.to(args.device), y_label.to(args.device)
 
-            # y_pred = model(X_data)
+            X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
+            
             test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
             test_label = np.append(test_label, y_label.cpu().detach().numpy())            
         

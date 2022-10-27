@@ -56,6 +56,14 @@ tar -zvf rtdl_data.tar.gz
 ├── utils.py
 etc..
 ``` 
+
+## Papers and projects
+
+| Name                                                          | Location                                                        | Comment        |
+| :------------------------------------------------------------ | :-------------------------------------------------------------- | :------------- |
+| Revisiting Pretrarining Objectives for Tabular Deep Learning  | [link](https://arxiv.org/abs/2207.03208) | arXiv 2022     |
+| On Embeddings for Numerical Features in Tabular Deep Learning | [link](https://arxiv.org/abs/2203.05556)     | arXiv 2022     |
+
 ## How to cite
 ```
 @article = {
@@ -66,12 +74,3 @@ etc..
     year = {2022},
 }
 ```
-
-## Papers and projects
-
-| Name                                                          | Location                                                        | Comment        |
-| :------------------------------------------------------------ | :-------------------------------------------------------------- | :------------- |
-| Revisiting Pretrarining Objectives for Tabular Deep Learning  | [link](https://arxiv.org/abs/2207.03208) | arXiv 2022     |
-| On Embeddings for Numerical Features in Tabular Deep Learning | [link](https://arxiv.org/abs/2203.05556)     | arXiv 2022     |
-
-

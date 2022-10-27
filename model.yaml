@@ -1,35 +1,53 @@
 # Yaml file get Model Parameter and Architecture
 fttransformer: 
   model : ft-transformer
+
+  # Model Architecture
+  activation : "reglu"
+  attention_dropout : 0.2
+  d_ffn_factor : 1.3333333333333
+  d_token :  192
+  ffn_dropout : 0.1
+  initialization : "kaiming"
+  n_heads : 8
+  n_layers : 3
+  prenormalization : true
+  residual_dropout : 0.0
+
+  # training info
   optim : AdamW
   lr : 1e-4
-  weight_decay : 1e-5
-  batchsize : 256
-  epochs : 80
+  weight_decay : 1e-05
+  batchsize : 1024
+  epochs : 10000000
   fold : 0
-  d_token :  8
-  n_blocks : 8
-  attention_dropout : 0.2
-  ffn_d_hidden : 6
-  ffn_dropout : 0.2
-  residual_dropout : 0.0
-  count : 2
+  count : 0
 
+  # kv_compression : None
+  # kv_compression_sharing : None
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 
 resnet:
   model : resnet
+  
+  # Model Architecture
+  activation : "relu"
+  d : 699
+  d_embedding : 0
+  d_hidden_factor : 1.957975483255938
+  hidden_dropout : 0.491251387
+  n_layers : 8
+  normalization : "batchnorm"
+  residual_dropout : 0.2196702022131011
+  
+  # training info
   optim : AdamW
-  lr : 1e-3
-  weight_decay : 0
-  batchsize : 4048
-  epochs : 80
+  lr : 0.00639124
+  weight_decay : 0.0
+  batchsize : 1024
+  epochs : 10000000
   fold : 0
-  d_main : 128
-  d_hidden : 4
-  n_blocks : 2
-  dropout_first : 0.2
-  dropout_second : 0.0
-  count : 1
+  count : 0
+
   # description: Training DL model [ ResNet ] for Tabular Data

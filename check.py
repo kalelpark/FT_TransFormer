@@ -6,75 +6,168 @@ from sklearn.model_selection import train_test_split
 import json
 from collections import OrderedDict
 from torch.utils.data import Dataset, DataLoader
+import typing as ty
+import torch.nn as nn
+import math
+import torch.nn.init as nn_init
+import torch
+import torch.nn.functional as F
 
-number = 123
-task_type = "binary"
-d_out= 1 if task_type == "regression" else 109 if task_type == "multiclass" else 2
-print(d_out)
-# with open("data/aloi/info.json", "r") as f:
-#         info_dict = json.load(f)
-
-# with open("model.yaml") as f:
-#         config = yaml.load(f, Loader = yaml.FullLoader)
-#         config["fttransformer"]["valid_score"] = 123
-#         config["fttransformer"]["ttrain_score"] = 123
-#         config["fttransformer"]["test_score"] = 123
-#         with open("tetetete", "w", encoding = "utf-8") as make_file:
-#                 json.dump(config["fttransformer"], make_file, ensure_ascii = False, indent = "\t")
+def reglu(x: Tensor) -> Tensor:
+    a, b = x.chunk(2, dim=-1)
+    return a * F.relu(b)
 
 
-# info_dict = dict()
-# info_dict["wongi"] = "helllooo"
-
-# print(info_dict)
-
-# with open("qqqqq/temp", "w", encoding = "utf-8") as make_file:
-#         json.dump(info_dict, make_file, ensure_ascii = False, indent = "\t")
-
-# temp = np.array(1)
-# temp
-# print(temp)
-# a = np.array([1, 2, 3])
-# print(np.shape(a))
-
-# print
-
-# class npy_dataset(Dataset):
-#     def __init__(self, data, label):
-#         self.data = data
-#         self.label = label
-    
-#     def __getitem__(self, idx):
-#         x_data = Tensor(self.data)[idx]
-#         y_label = Tensor(self.label)[idx]
-
-#         return x_data, y_label
-    
-#     def __len__(self):
-#         return len(self.data)
-
-# train_data, label_data = np.load("data/aloi/N_train.npy"), np.load("data/aloi/y_train.npy") 
-# # print(np.shape(train_data), np.shape(label_data))
-# custom_dataset = npy_dataset(data = train_data, label = label_data)
-# train_dataloader = DataLoader(custom_dataset, batch_size = int(224), pin_memory = True)
-# for i, t in train_dataloader:
-#     print(i.size(), t.size())
-# temp, temp_1 = next(iter(custom_dataset))
-# print(Tensor(temp).size(), Tensor(temp_1).size())
-
-# print(np.shape(train_data), np.shape(train_data[[1, 2, 3]]))
+def geglu(x: Tensor) -> Tensor:
+    a, b = x.chunk(2, dim=-1)
+    return a * F.gelu(b)
 
 
+class ReGLU(nn.Module):
+    def forward(self, x: Tensor) -> Tensor:
+        return reglu(x)
 
 
-
-# for data_folder in data_folders:
-#     data_path = os.path.join(data_paths, data_folder)
-#     os.path_join(data_path, "N_train")
-#     y_train_path = os.path_join(data_path, "N_val")
-#     y_train_path = os.path_join(data_path, "y_train")
-#     print(data_path)
-#     break
+class GEGLU(nn.Module):
+    def forward(self, x: Tensor) -> Tensor:
+        return geglu(x)
 
 
-# trai
+def get_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        reglu
+        if name == 'reglu'
+        else geglu
+        if name == 'geglu'
+        else torch.sigmoid
+        if name == 'sigmoid'
+        else getattr(F, name)
+    )
+
+
+def get_nonglu_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        F.relu
+        if name == 'reglu'
+        else F.gelu
+        if name == 'geglu'
+        else get_activation_fn(name)
+    )
+
+
+def get_nonglu_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        F.relu
+        if name == 'reglu'
+        else F.gelu
+        if name == 'geglu'
+        else get_activation_fn(name)
+    )
+
+class ResNet(nn.Module):
+    def __init__(
+        self,
+        *,
+        d_numerical: int,
+        categories: ty.Optional[ty.List[int]],
+        d_embedding: int,
+        d: int,
+        d_hidden_factor: float,
+        n_layers: int,
+        activation: str,
+        normalization: str,
+        hidden_dropout: float,
+        residual_dropout: float,
+        d_out: int,
+    ) -> None:
+        super().__init__()
+
+        def make_normalization():
+            return {'batchnorm': nn.BatchNorm1d, 'layernorm': nn.LayerNorm}[
+                normalization
+            ](d)
+
+        self.main_activation = get_activation_fn(activation)
+        self.last_activation = get_nonglu_activation_fn(activation)
+        self.residual_dropout = residual_dropout
+        self.hidden_dropout = hidden_dropout
+
+        d_in = d_numerical
+        d_hidden = int(d * d_hidden_factor)
+
+        if categories is not None:
+            d_in += len(categories) * d_embedding
+            category_offsets = torch.tensor([0] + categories[:-1]).cumsum(0)
+            self.register_buffer('category_offsets', category_offsets)
+            self.category_embeddings = nn.Embedding(sum(categories), d_embedding)
+            nn.init.kaiming_uniform_(self.category_embeddings.weight, a=math.sqrt(5))
+            print(f'{self.category_embeddings.weight.shape=}')
+
+        self.first_layer = nn.Linear(d_in, d)
+        self.layers = nn.ModuleList(
+            [
+                nn.ModuleDict(
+                    {
+                        'norm': make_normalization(),
+                        'linear0': nn.Linear(
+                            d, d_hidden * (2 if activation.endswith('glu') else 1)
+                        ),
+                        'linear1': nn.Linear(d_hidden, d),
+                    }
+                )
+                for _ in range(n_layers)
+            ]
+        )
+        self.last_normalization = make_normalization()
+        self.head = nn.Linear(d, d_out)
+
+    def forward(self, x_num: Tensor, x_cat: ty.Optional[Tensor]) -> Tensor:
+        x = []
+        if x_num is not None:
+            x.append(x_num)
+        if x_cat is not None:
+            x.append(
+                self.category_embeddings(x_cat + self.category_offsets[None]).view(
+                    x_cat.size(0), -1
+                )
+            )
+        x = torch.cat(x, dim=-1)
+
+        x = self.first_layer(x)
+        for layer in self.layers:
+            layer = ty.cast(ty.Dict[str, nn.Module], layer)
+            z = x
+            z = layer['norm'](z)
+            z = layer['linear0'](z)
+            z = self.main_activation(z)
+            if self.hidden_dropout:
+                z = F.dropout(z, self.hidden_dropout, self.training)
+            z = layer['linear1'](z)
+            if self.residual_dropout:
+                z = F.dropout(z, self.residual_dropout, self.training)
+            x = x + z
+        x = self.last_normalization(x)
+        x = self.last_activation(x)
+        x = self.head(x)
+        return x
+
+
+if __name__ == "__main__":
+    x = torch.randn(4, 4)
+    model = ResNet(
+        d_numerical= 4,
+        categories = None,
+        activation = "relu",
+        d = 699,
+        d_embedding = 0,
+        d_hidden_factor = 1.957975483255938,
+        hidden_dropout = 0.491251387,
+        n_layers = 8,
+        normalization = "batchnorm",
+        residual_dropout = 0.2196702022131011,
+        d_out = 1
+    )
+
+    temp = model(x, x_cat = None)
+    print(temp)
+    print(temp.size())

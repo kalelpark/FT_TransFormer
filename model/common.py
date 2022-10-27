@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim
 from torch import Tensor
-from .fttransformer import FTTransformer
+from .fttransformer import Transformer
 from .resnet import ResNet
 
 ModuleType = Union[str, Callable[..., nn.Module]]
@@ -35,29 +35,47 @@ class GEGLU(nn.Module):
         return geglu(x)
 
 def load_model(config: ty.Dict , info_dict : ty.Dict):
-    # 저장한 정보도 반환하게 끔 만들기
     if config["model"] == "ft-transformer":
-        return FTTransformer.make_baseline(
-                            # Example
-                            n_num_features = int(info_dict["n_num_features"]),
-                            cat_cardinalities= None,
-                            d_token = int(config["d_token"]),
-                            n_blocks = int(config["n_blocks"]),
-                            attention_dropout = float(config["attention_dropout"]),
-                            ffn_d_hidden = int(config["ffn_d_hidden"]),
-                            ffn_dropout = float(config["ffn_dropout"]),
-                            residual_dropout= float(config["residual_dropout"]),
-                            d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
-                        )
-    elif config["model"] == "resnet":
-        return ResNet.make_baseline(
-                        d_in = int(info_dict["n_num_features"]),
-                        n_blocks = int(config["n_blocks"]),
-                        d_main = int(config["d_main"]),
-                        d_hidden = int(config["d_hidden"]),
-                        dropout_first = float(config["dropout_first"]),
-                        dropout_second = float(config["dropout_second"]),
+        return Transformer(
+                        d_numerical = int(info_dict["n_num_features"]),
+                        categories = None,
+
+                        # Model Architecture
+                        n_layers = int(config["n_layers"]),
+                        n_heads = int(config["n_heads"]),
+                        d_token = int(config["d_token"]),
+                        d_ffn_factor = float(config["d_ffn_factor"]),
+                        attention_dropout = float(config["attention_dropout"]),
+                        ffn_dropout = float(config["attention_dropout"]),
+                        residual_dropout = float(config["residual_dropout"]),
+                        activation = config["activation"],
+                        prenormalization = True,
+                        initialization = config["initialization"],
+                        
+                        # default_Setting
+                        token_bias = True,
+                        kv_compression = None,
+                        kv_compression_sharing= None,
                         d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
-                    )
+        )
+
+    elif config["model"] == "resnet":
+        return ResNet(
+                    d_numerical= int(info_dict["n_num_features"]),
+                    categories = None,
+
+                    # ModelA Architecture
+                    activation = "relu",
+                    d = int(info_dict["d"]),
+                    d_embedding = int(info_dict["d_embedding"]),
+                    d_hidden_factor = float(info_dict["d_hidden_factor"]), 
+                    hidden_dropout = float(info_dict["hidden_dropout"]),
+                    n_layers = int(info_dict["n_layers"]),
+                    normalization = info_dict["batchnorm"],
+                    residual_dropout = float(info_dict["residual_dropout"]),
+                    
+                    # default_Setting
+                    d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
+        )
     else:
         pass

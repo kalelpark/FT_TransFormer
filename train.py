@@ -53,8 +53,8 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
 
 # 
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config):
-
     model.to(args.device)
+    model = nn.DataParallel(model)
     method = "ensemble" if config["fold"] > 0 else "default"
     json_info_output_path = os.path.join(str(args.savepath), config["model"], str(args.data), method)
     print("Ready to run model...")
@@ -76,9 +76,8 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             optimizer.zero_grad()
 
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
-
-            loss = loss_fn(y_pred.squeeze(1), y_label)
+            y_pred = model(X_data) if config["model"] == "!!" else model(x_num = X_data, x_cat = None)
+            loss = loss_fn(y_pred.to(torch.float64).squeeze(1), y_label.to(torch.float64))
             
             loss.backward()
             optimizer.step()
@@ -91,7 +90,7 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
         for X_data, y_label in valid_dataloader:        # Valid
             
             X_data, y_label = X_data.to(args.device), y_label.to(args.device) 
-            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
+            y_pred = model(X_data) if config["model"] == "!!" else model(x_num = X_data, x_cat = None)
 
             valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
             valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
@@ -100,7 +99,7 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
         for X_data, y_label in test_dataloader:         # Test
 
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            y_pred = model(X_data) if config["model"] == "resnet" else model(x_num = X_data, x_cat = None)
+            y_pred = model(X_data) if config["model"] == "!!" else model(x_num = X_data, x_cat = None)
             
             test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
             test_label = np.append(test_label, y_label.cpu().detach().numpy())            

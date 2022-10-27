@@ -1,5 +1,6 @@
 import os
 import json
+import torch
 import numpy as np
 import typing as ty
 from torch import Tensor
@@ -14,9 +15,9 @@ class npy_dataset(Dataset):
         self.label = label
     
     def __getitem__(self, idx):
-        x_data = FloatTensor(self.data)[idx]
-        y_label = FloatTensor(self.label)[idx]
-
+        x_data = torch.from_numpy(self.data)[idx]
+        y_label = torch.from_numpy(self.label)[idx]
+        
         return x_data, y_label
     
     def __len__(self):
@@ -84,7 +85,6 @@ def load_dataset(data_path : str) -> ty.List[ty.Dict[str, str]]:
     if info_dict["task_type"] == "regression":
         y_mean = y_train_data.mean()
         y_std = y_train_data.std()
-
         y_train_data = (y_train_data - y_mean) / y_std
         y_val_data = (y_val_data - y_mean) / y_std
         y_test_data = (y_test_data - y_mean) / y_std

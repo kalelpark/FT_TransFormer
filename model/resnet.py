@@ -10,176 +10,140 @@ import torch.optim
 from torch import Tensor
 from .common import *
 
-ModuleType = Union[str, Callable[..., nn.Module]]
-
-def _make_nn_module(module_type : ModuleType, *args) -> nn.Module:  ## Active Function을 전달합니다.
-    if isinstance(module_type, str):
-        if module_type == 'ReGLU':
-            return ReGLU()
-        elif module_type == 'GeGLU':
-            return GEGLU()
-        else:
-            try:
-                cls = getattr(nn, module_type)
-            except AttributeError as err:
-                raise ValueError(
-                    f'Failed to construct the module {module_type} with the arguments {args}'
-                ) from err
-            return cls(*args)
-    else:
-        return module_type(*args)
+def reglu(x: Tensor) -> Tensor:
+    a, b = x.chunk(2, dim=-1)
+    return a * F.relu(b)
 
 
+def geglu(x: Tensor) -> Tensor:
+    a, b = x.chunk(2, dim=-1)
+    return a * F.gelu(b)
+
+
+class ReGLU(nn.Module):
+    def forward(self, x: Tensor) -> Tensor:
+        return reglu(x)
+
+
+class GEGLU(nn.Module):
+    def forward(self, x: Tensor) -> Tensor:
+        return geglu(x)
+
+
+def get_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        reglu
+        if name == 'reglu'
+        else geglu
+        if name == 'geglu'
+        else torch.sigmoid
+        if name == 'sigmoid'
+        else getattr(F, name)
+    )
+
+
+def get_nonglu_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        F.relu
+        if name == 'reglu'
+        else F.gelu
+        if name == 'geglu'
+        else get_activation_fn(name)
+    )
+
+
+def get_nonglu_activation_fn(name: str) -> ty.Callable[[Tensor], Tensor]:
+    return (
+        F.relu
+        if name == 'reglu'
+        else F.gelu
+        if name == 'geglu'
+        else get_activation_fn(name)
+    )
 
 class ResNet(nn.Module):
-    """
-    The ResNet Model composed FCN and Blocks.
-
-    ResNet: (in) -> Linear -> Block -> ... -> Block -> Head -> (out)
-
-        |-> Norm -> Linear -> Activation -> Dropout -> Linear -> Dropout ->|
-        |                                                                  |
-    Block: (in) --------------------------------------------------------> Add -> (out)
-
-    Head: (in) -> Norm -> Activation -> Linear -> (out)
-    """
-
-    """
-    Examples of Test CODE:
-        >> Test CODE
-            x = torch.randn(4, 2)
-            module = ResNet.make_baseline(
-                d_in=x.shape[1],
-                n_blocks=2,
-                d_main=3,
-                d_hidden=4,
-                dropout_first=0.25,
-                dropout_second=0.0,
-                d_out=1
-            )
-
-            print(module(x))
-    """
-    
-    class Block(nn.Module):
-        def __init__(
-            self,
-            *,
-            d_main : int,
-            d_hidden : int,
-            bias_first : bool,
-            bias_second : bool,
-            dropout_first : float,
-            dropout_second : float,
-            normalization : ModuleType,
-            activation : ModuleType,
-            skip_connection : bool
-        ) -> None:
-            super().__init__()
-            self.normalization = _make_nn_module(normalization, d_main)
-            self.linear_first = nn.Linear(d_main, d_hidden, bias_first)
-            self.activation = _make_nn_module(activation)
-            self.dropout_first = nn.Dropout(dropout_first)
-            self.linear_second = nn.Linear(d_hidden, d_main, bias_second)
-            self.dropout_second = nn.Dropout(dropout_second)
-            self.skip_connection = skip_connection
-
-        def forward(self, x : Tensor) -> Tensor:
-            x_input = x
-            x = self.normalization(x)
-            x = self.linear_first(x)
-            x = self.activation(x)
-            x = self.dropout_first(x)
-            x = self.linear_second(x)
-            x = self.dropout_second(x)
-            
-            if self.skip_connection:
-                x = x_input + x
-            return x
-
-    class Head(nn.Module):
-        def __init__(
-            self,
-            *,
-            d_in : int,
-            d_out : int,
-            bias : bool,
-            normalization : ModuleType,
-            activation : ModuleType
-        ) -> None:
-            super().__init__()
-            self.normalization = _make_nn_module(normalization, d_in)
-            self.activation = _make_nn_module(activation)
-            self.linear = nn.Linear(d_in, d_out, bias)
-        
-        def forward(self, x: Tensor) -> Tensor:
-            if self.normalization is not None:
-                x = self.normalization(x)
-            x = self.activation(x)
-            x = self.linear(x)
-            return x
-    
-    def __init__(self, *, d_in : int, n_blocks : int, d_main : int, d_hidden : int, dropout_first : float, dropout_second : float,
-                normalization : ModuleType, activation : ModuleType, d_out : int) -> None:
-                
-                super().__init__()
-                self.first_layer = nn.Linear(d_in, d_main)
-
-                if d_main is None:
-                    d_main = d_in
-                self.blocks = nn.Sequential(
-                    *[
-                        ResNet.Block(
-                            d_main = d_main,
-                            d_hidden = d_hidden,
-                            bias_first = True,
-                            bias_second = True,
-                            dropout_first = dropout_first,
-                            dropout_second = dropout_second,
-                            normalization = normalization,
-                            activation = activation,
-                            skip_connection = True,
-                        )
-                        for _ in range(n_blocks)
-                    ]
-                )
-
-                self.head = ResNet.Head(
-                    d_in = d_main,
-                    d_out = d_out,
-                    bias = True,
-                    normalization = normalization,
-                    activation = activation
-                )
-                
-    @classmethod
-    def make_baseline(
-        cls: Type['ResNet'],
+    def __init__(
+        self,
         *,
-        d_in : int,
-        n_blocks : int,
-        d_main : int,
-        d_hidden : int,
-        dropout_first : float,
-        dropout_second : float,
-        d_out : int
-    ) -> 'ResNet':            
+        d_numerical: int,
+        categories: ty.Optional[ty.List[int]],
+        d_embedding: int,
+        d: int,
+        d_hidden_factor: float,
+        n_layers: int,
+        activation: str,
+        normalization: str,
+        hidden_dropout: float,
+        residual_dropout: float,
+        d_out: int,
+    ) -> None:
+        super().__init__()
 
-        return cls(
-            d_in = d_in,
-            n_blocks = n_blocks,
-            d_main = d_main,
-            d_hidden = d_hidden,
-            dropout_first = dropout_first,
-            dropout_second = dropout_second,
-            normalization = 'BatchNorm1d',
-            activation = 'ReLU',
-            d_out = d_out,
+        def make_normalization():
+            return {'batchnorm': nn.BatchNorm1d, 'layernorm': nn.LayerNorm}[
+                normalization
+            ](d)
+
+        self.main_activation = get_activation_fn(activation)
+        self.last_activation = get_nonglu_activation_fn(activation)
+        self.residual_dropout = residual_dropout
+        self.hidden_dropout = hidden_dropout
+
+        d_in = d_numerical
+        d_hidden = int(d * d_hidden_factor)
+
+        if categories is not None:
+            d_in += len(categories) * d_embedding
+            category_offsets = torch.tensor([0] + categories[:-1]).cumsum(0)
+            self.register_buffer('category_offsets', category_offsets)
+            self.category_embeddings = nn.Embedding(sum(categories), d_embedding)
+            nn.init.kaiming_uniform_(self.category_embeddings.weight, a=math.sqrt(5))
+            print(f'{self.category_embeddings.weight.shape=}')
+
+        self.first_layer = nn.Linear(d_in, d)
+        self.layers = nn.ModuleList(
+            [
+                nn.ModuleDict(
+                    {
+                        'norm': make_normalization(),
+                        'linear0': nn.Linear(
+                            d, d_hidden * (2 if activation.endswith('glu') else 1)
+                        ),
+                        'linear1': nn.Linear(d_hidden, d),
+                    }
+                )
+                for _ in range(n_layers)
+            ]
         )
-    
-    def forward(self, x : Tensor) -> Tensor:
-        x = self.first_layer(x)
-        x = self.blocks(x)
-        x = self.head(x)
+        self.last_normalization = make_normalization()
+        self.head = nn.Linear(d, d_out)
 
+    def forward(self, x_num: Tensor, x_cat: ty.Optional[Tensor]) -> Tensor:
+        x = []
+        if x_num is not None:
+            x.append(x_num)
+        if x_cat is not None:
+            x.append(
+                self.category_embeddings(x_cat + self.category_offsets[None]).view(
+                    x_cat.size(0), -1
+                )
+            )
+        x = torch.cat(x, dim=-1)
+
+        x = self.first_layer(x)
+        for layer in self.layers:
+            layer = ty.cast(ty.Dict[str, nn.Module], layer)
+            z = x
+            z = layer['norm'](z)
+            z = layer['linear0'](z)
+            z = self.main_activation(z)
+            if self.hidden_dropout:
+                z = F.dropout(z, self.hidden_dropout, self.training)
+            z = layer['linear1'](z)
+            if self.residual_dropout:
+                z = F.dropout(z, self.residual_dropout, self.training)
+            x = x + z
+        x = self.last_normalization(x)
+        x = self.last_activation(x)
+        x = self.head(x)
         return x

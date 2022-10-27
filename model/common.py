@@ -66,14 +66,14 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
 
                     # ModelA Architecture
                     activation = "relu",
-                    d = int(info_dict["d"]),
-                    d_embedding = int(info_dict["d_embedding"]),
-                    d_hidden_factor = float(info_dict["d_hidden_factor"]), 
-                    hidden_dropout = float(info_dict["hidden_dropout"]),
-                    n_layers = int(info_dict["n_layers"]),
-                    normalization = info_dict["batchnorm"],
-                    residual_dropout = float(info_dict["residual_dropout"]),
-                    
+                    d = int(config["d"]),
+                    d_embedding = int(config["d_embedding"]),
+                    d_hidden_factor = float(config["d_hidden_factor"]), 
+                    hidden_dropout = float(config["hidden_dropout"]),
+                    n_layers = int(config["n_layers"]),
+                    normalization = config["normalization"],
+                    residual_dropout = float(config["residual_dropout"]),
+
                     # default_Setting
                     d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
         )

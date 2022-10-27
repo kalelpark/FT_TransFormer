@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1, 2" 
+os.environ['CUDA_VISIBLE_DEVICES'] = "3, 4, 5" 
 import yaml
 import typing as ty
 import argparse

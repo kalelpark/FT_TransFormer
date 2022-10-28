@@ -10,12 +10,12 @@
 
 # TIP!
 # FT-Transformer
-# python main.py --action train --model fttransformer --data microsoft --savepath output        # // Regression
-# python main.py --action train --model resnet --data aloi --savepath output            // Multi Label 
-# python main.py --action train --model resnet --data epsilon --savepath output            // Binary Label
+# python main.py --action train --model fttransformer --data california_housing --savepath output        // Regression -> Clear
+# python main.py --action train --model fttransformer --data aloi --savepath output                      // Multi Label 
+# python main.py --action train --model fttransformer --data epsilon --savepath output                  // Binary Label
 
 # ResNet
-# python main.py --action train --model resnet --data microsoft --savepath output               # // Regression
+# python main.py --action train --model resnet --data california_housing --savepath output               // Regression
 # python main.py --action train --model resnet --data aloi --savepath output               // Multi Label
 # python main.py --action train --model resnet --data epsilon --savepath output               // Binary Label
 

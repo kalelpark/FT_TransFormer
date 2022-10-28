@@ -18,7 +18,7 @@ fttransformer:
   optim : AdamW
   lr : 1e-4
   weight_decay : 1e-05
-  batchsize : 256
+  batchsize : 1024
   epochs : 10000000
   fold : 0
   count : 0
@@ -33,19 +33,19 @@ resnet:
   
   # Model Architecture
   activation : "relu"
-  d : 168
+  d : 235
   d_embedding : 0
-  d_hidden_factor : 2.98304144273798
-  hidden_dropout : 0.4456540496119129
-  n_layers : 3
+  d_hidden_factor : 3.402306744158719
+  hidden_dropout : 0.3612608569439376
+  n_layers : 12
   normalization : "batchnorm"
   residual_dropout : 0.0
   
   # training info
   optim : AdamW
-  lr : 0.00175948555
-  weight_decay : 0.0009508455223812318
-  batchsize : 256
+  lr : 4.354575453864104e-05
+  weight_decay : 0.0
+  batchsize : 1024
   epochs : 10000000
   fold : 0
   count : 0

@@ -29,7 +29,7 @@ def geglu(x : Tensor) -> Tensor:
 class ReGLU(nn.Module):
     def forward(self, x : Tensor) -> Tensor:
         return reglu(x)
-
+        
 class GEGLU(nn.Module):
     def forward(self, x : Tensor) -> Tensor:
         return geglu(x)
@@ -56,7 +56,7 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                         token_bias = True,
                         kv_compression = None,
                         kv_compression_sharing= None,
-                        d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
+                        d_out = int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 1
         )
 
     elif config["model"] == "resnet":
@@ -75,7 +75,7 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                     residual_dropout = float(config["residual_dropout"]),
 
                     # default_Setting
-                    d_out = 1 if info_dict["task_type"] == "regression" else int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 2
+                    d_out = int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 1
         )
     else:
         pass

@@ -18,13 +18,13 @@ fttransformer:
   optim : AdamW
   lr : 1e-4
   weight_decay : 1e-05
-  batchsize : 256
+  batchsize : 512
   epochs : 10000000
   fold : 0
   count : 0
 
-  # kv_compression : None
-  # kv_compression_sharing : None
+  kv_compression : None
+  kv_compression_sharing : None
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 
@@ -33,19 +33,19 @@ resnet:
   
   # Model Architecture
   activation : "relu"
-  d : 168
+  d : 431
   d_embedding : 0
-  d_hidden_factor : 2.98304144273798
-  hidden_dropout : 0.4456540496119129
-  n_layers : 3
+  d_hidden_factor : 3.782741476775878
+  hidden_dropout : 0.45760169367841
+  n_layers : 7
   normalization : "batchnorm"
   residual_dropout : 0.0
   
   # training info
   optim : AdamW
-  lr : 0.00175948555
-  weight_decay : 0.0009508455223812318
-  batchsize : 256
+  lr : 3.078620509197834e-05
+  weight_decay : 0.0
+  batchsize : 512
   epochs : 10000000
   fold : 0
   count : 0

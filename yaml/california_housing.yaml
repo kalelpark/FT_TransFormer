@@ -43,7 +43,7 @@ resnet:
   
   # training info
   optim : AdamW
-  lr : 0.00175948555
+  lr : 0.001759485551174299
   weight_decay : 0.0009508455223812318
   batchsize : 256
   epochs : 10000000

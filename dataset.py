@@ -71,9 +71,9 @@ def load_dataset(data_path : str) -> ty.List[ty.Dict[str, str]]:
     N_test_data, y_test_data = np.load(os.path.join(data_path, N_test)), np.load(os.path.join(data_path, y_test))
 
     if info_dict["task_type"] != "regression":
-        y_train_data = LabelEncoder.fit_transform(y_train_data).astype("int64")
-        y_val_data = LabelEncoder.fit_transform(y_val_data).astype("int64")
-        y_test_data = LabelEncoder.fit_transform(y_test_data).astype("int64")
+        y_train_data = LabelEncoder().fit_transform(y_train_data).astype("int64")
+        y_val_data = LabelEncoder().fit_transform(y_val_data).astype("int64")
+        y_test_data = LabelEncoder().fit_transform(y_test_data).astype("int64")
 
     n_classes = int(max(y_train_data)) + 1 if info_dict["task_type"] == "multiclass" else None
     
@@ -81,6 +81,8 @@ def load_dataset(data_path : str) -> ty.List[ty.Dict[str, str]]:
     train_dict["N_train"] = preprocess.transform(N_train_data)
     val_dict["N_val"] = preprocess.transform(N_val_data)
     test_dict["N_test"] = preprocess.transform(N_test_data)
+    
+    y_std = None
 
     if info_dict["task_type"] == "regression":
         y_mean = y_train_data.mean()
@@ -100,56 +102,4 @@ def load_dataset(data_path : str) -> ty.List[ty.Dict[str, str]]:
 
     d_out = n_classes or 1
 
-    return train_dict, val_dict, test_dict, info_dict, d_out
-
-
-# def load_dataset(data_path : str) ->  ty.List[ty.Dict[str, str]]:
-    
-#     """
-#     load data and json info and return train_dict, val_dict, test_dict
-#     - If you question or Error, leave an Issue.
-#     """
-
-#     info_json = "info.json"
-#     N_train, y_train = "N_train.npy", "y_train.npy"
-#     N_test, y_test = "N_test.npy", "y_test.npy"
-#     N_val, y_val = "N_val.npy", "y_val.npy"
-
-#     json_path = os.path.join(data_path, info_json)
-    
-#     with open(json_path, "r") as f:
-#         info_dict = json.load(f)
-
-#     train_dict = {}
-#     val_dict = {}
-#     test_dict = {} 
-    
-#     # load_dataset
-#     N_train_data, y_train_data = np.load(os.path.join(data_path, N_train)), np.load(os.path.join(data_path, y_train))    
-#     N_val_data, y_val_data = np.load(os.path.join(data_path, N_val)), np.load(os.path.join(data_path, y_val))
-#     N_test_data, y_test_data = np.load(os.path.join(data_path, N_test)), np.load(os.path.join(data_path, y_test))
-
-#     if info_dict["task_type"] != "regression":
-#         y_train_data = LabelEncoder.fit_transform(y_train_data).astype('int64')
-#         y_val_data = LabelEncoder.fit_transform(y_val_data).astype('int64')
-#         y_test_data = LabelEncoder.fit_transform(y_test_data).astype('int64')
-    
-#     n_classes = int(max(y_train_data)) + 1 if info_dict["task_type"] == 'multiclass' else None
-
-#     preprocess = StandardScaler().fit(N_train_data)
-
-#     train_dict["N_train"] = preprocess.transform(N_train_data)
-#     val_dict["N_val"] = preprocess.transform(N_val_data)
-#     test_dict["N_test"] = preprocess.transform(N_test_data)
-
-#     if info_dict["task_type"] == "regression":
-#         y_mean = y_train_data.mean()
-#         y_std = y_train_data.std()
-#     train_dict["y_train"] = y_train_data
-#     val_dict["y_val"] = y_val_data
-#     test_dict["y_test"] = y_test_data
-
-
-#     return train_dict, val_dict, test_dict, info_dict
-    
-
+    return train_dict, val_dict, test_dict, info_dict, d_out, y_std

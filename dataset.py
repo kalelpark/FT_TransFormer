@@ -76,7 +76,7 @@ def load_dataset(data_path : str) -> ty.List[ty.Dict[str, str]]:
         y_test_data = LabelEncoder().fit_transform(y_test_data).astype("int64")
 
     n_classes = int(max(y_train_data)) + 1 if info_dict["task_type"] == "multiclass" else None
-    
+
     preprocess = StandardScaler().fit(N_train_data)
     train_dict["N_train"] = preprocess.transform(N_train_data)
     val_dict["N_val"] = preprocess.transform(N_val_data)

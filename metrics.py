@@ -5,11 +5,9 @@ import scipy
 import torch
 # torch.metrics
 def get_accuracy_score(y_pred : ty.List[np.ndarray], y_label : ty.List[np.ndarray], dataset_info_dict) -> float:
-
-    if dataset_info_dict["task_type"] == "multiclass":
-        pass
-    else:
-        y_pred = np.round(scipy.special.expit(y_pred))
+    
+    if dataset_info_dict["task_type"] == "binclass":
+        y_pred = scipy.special.expit(y_pred)
 
     return accuracy_score(y_pred, y_label)
 

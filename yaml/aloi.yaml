@@ -23,8 +23,10 @@ fttransformer:
   fold : 0
   count : 0
 
-  # kv_compression : None
-  # kv_compression_sharing : None
+  kv_compression : 0
+  kv_compression_sharing : 0
+
+
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 

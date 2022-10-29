@@ -22,9 +22,9 @@ fttransformer:
   epochs : 10000000
   fold : 0
   count : 0
-
-  kv_compression : None
-  kv_compression_sharing : None
+  
+  kv_compression : 0.064
+  kv_compression_sharing : headwise
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 

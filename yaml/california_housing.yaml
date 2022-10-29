@@ -19,12 +19,12 @@ fttransformer:
   lr : 1e-4
   weight_decay : 1e-05
   batchsize : 256
-  epochs : 10000000
+  epochs : 1000
   fold : 0
-  count : 0
+  count : 1
 
-  # kv_compression : None
-  # kv_compression_sharing : None
+  kv_compression : 0
+  kv_compression_sharing : 0
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 
@@ -48,6 +48,6 @@ resnet:
   batchsize : 256
   epochs : 10000000
   fold : 0
-  count : 0
+  count : 1
 
   # description: Training DL model [ ResNet ] for Tabular Data

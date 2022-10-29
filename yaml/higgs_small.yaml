@@ -5,7 +5,7 @@ fttransformer:
   # Model Architecture
   activation : "reglu"
   attention_dropout : 0.2
-  d_ffn_factor : 1.3333333333333
+  d_ffn_factor : 1.333333333333333
   d_token :  192
   ffn_dropout : 0.1
   initialization : "kaiming"
@@ -16,14 +16,14 @@ fttransformer:
 
   # training info
   optim : AdamW
-  lr : 1e-4
-  weight_decay : 1e-05
+  lr : 1e-5
+  weight_decay : 1e-5
   batchsize : 512
   epochs : 10000000
   fold : 0
   count : 0
-
-  kv_compression : None
+ # 80429 68151
+  kv_compression : None 
   kv_compression_sharing : None
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
@@ -52,3 +52,7 @@ resnet:
   count : 0
 
   # description: Training DL model [ ResNet ] for Tabular Data
+
+
+
+  # 62896 63475 64571

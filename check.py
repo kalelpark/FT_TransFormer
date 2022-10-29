@@ -13,7 +13,13 @@ import torch.nn.init as nn_init
 import torch
 import torch.nn.functional as F
 
-with open(f"yaml/aloi.yaml") as f:
+with open(f"yaml/california_housing.yaml") as f:
     config = yaml.load(f, Loader = yaml.FullLoader)["fttransformer"]
 
 print(config)
+temp_np = np.array([-0.1, 0.2, 0.3, 0.4])
+temp_torch = torch.Tensor([-0.1, 0.2, 0.3, 0.4]).detach().numpy()
+temp_torch
+print(temp_np)
+print(temp_torch)
+print(type(temp_torch))

@@ -8,3 +8,6 @@ output
 wandb
 __pycache__
 model_check.py
+checked.ipynb
+check.py
+infer.py

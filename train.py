@@ -53,6 +53,7 @@ def model_train(args : ty.Any, config: ty.Dict[str, ty.List[str]]) -> None:
 
 # 
 def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, test_dataloader, dataset_info_dict, args, config, y_std):
+    seed_everything(0)
     model.to(args.device)
     model = nn.DataParallel(model)
     method = "ensemble" if config["fold"] > 0 else "default"
@@ -71,71 +72,70 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
         train_pred, valid_pred, test_pred = np.array([]), np.array([]), np.array([])
         train_label, valid_label, test_label = np.array([]), np.array([]), np.array([])
 
-        model.train()       # trainloader
+        model.train()       # Train DataLoader
         for X_data, y_label in train_dataloader:        # Train
             optimizer.zero_grad()
 
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
             y_pred = model(x_num = X_data, x_cat = None)
+
             if dataset_info_dict["task_type"] == "regression":
                 loss = loss_fn(y_pred.to(torch.float64).squeeze(1), y_label.to(torch.float64))
-            elif dataset_info_dict["task_type"] == "binclass":
-                loss = loss_fn(y_pred.squeeze(1), y_label)
+            elif dataset_info_dict["task_type"] == "binclass":      # ERROR
+                loss = loss_fn(y_pred.squeeze(1), y_label.to(torch.float32))
             else:
                 loss = loss_fn(y_pred, y_label)
-
+                
             loss.backward()
             optimizer.step()
             train_loss_score += loss.item()
             
-            if dataset_info_dict["task_type"] == "regression" or dataset_info_dict["task_type"] == "binclass":
+            if dataset_info_dict["task_type"] == "regression":
                 train_pred = np.append(train_pred, y_pred.cpu().detach().numpy())
                 train_label = np.append(train_label, y_label.cpu().detach().numpy())
-            # elif dataset_info_dict["task_type"] == "binclass":
-            #     pass
+            elif dataset_info_dict["task_type"] == "binclass":      # ERROR
+                train_pred = np.append(train_pred, y_pred.cpu().detach().numpy())
+                train_label = np.append(train_label, y_label.cpu().detach().numpy())
             else:
-                temp, indics = torch.max(y_pred, 1)
+                _, indics = torch.max(y_pred, 1)
                 train_pred = np.append(train_pred, indics.cpu().detach().numpy())
                 train_label = np.append(train_label, y_label.cpu().detach().numpy())                
 
         
-        model.eval()        # validationloader
-        for X_data, y_label in valid_dataloader:        # Valid
+        model.eval()        # Valid DataLoader
+        for X_data, y_label in valid_dataloader:
             
             X_data, y_label = X_data.to(args.device), y_label.to(args.device) 
-            y_pred = model(X_data) if config["model"] == "!!" else model(x_num = X_data, x_cat = None)
+            y_pred = model(x_num = X_data, x_cat = None)
 
-            if dataset_info_dict["task_type"] == "regression" or dataset_info_dict["task_type"] == "binclass":
+            if dataset_info_dict["task_type"] == "regression":
                 valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
                 valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
-            # elif dataset_info_dict["task_type"] == "binclass":
-            #     pass
+            elif dataset_info_dict["task_type"] == "binclass":      # ERROR
+                valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
+                valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
             else:
-                temp, indics = torch.max(y_pred, 1)
+                _, indics = torch.max(y_pred, 1)
                 valid_pred = np.append(valid_pred, indics.cpu().detach().numpy())
                 valid_label = np.append(valid_label, y_label.cpu().detach().numpy())    
 
-            # valid_pred = np.append(valid_pred, y_pred.cpu().detach().numpy())
-            # valid_label = np.append(valid_label, y_label.cpu().detach().numpy())
-
-        model.eval()    # testloader
-        for X_data, y_label in test_dataloader:         # Test
+        model.eval()    # Test DataLoader
+        for X_data, y_label in test_dataloader:       
 
             X_data, y_label = X_data.to(args.device), y_label.to(args.device)
-            y_pred = model(X_data) if config["model"] == "!!" else model(x_num = X_data, x_cat = None)
+            y_pred = model(x_num = X_data, x_cat = None)
 
-            if dataset_info_dict["task_type"] == "regression" or dataset_info_dict["task_type"] == "binclass":
+            if dataset_info_dict["task_type"] == "regression":
                 test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
                 test_label = np.append(test_label, y_label.cpu().detach().numpy())
-            # elif dataset_info_dict["task_type"] == "binclass":
-            #     pass
+            elif dataset_info_dict["task_type"] == "binclass":  # ERROR
+                test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
+                test_label = np.append(test_label, y_label.cpu().detach().numpy())
             else:
-                temp, indics = torch.max(y_pred, 1)
+                _, indics = torch.max(y_pred, 1)
                 test_pred = np.append(test_pred, indics.cpu().detach().numpy())
                 test_label = np.append(test_label, y_label.cpu().detach().numpy())
-
-            # test_pred = np.append(test_pred, y_pred.cpu().detach().numpy())
-            # test_label = np.append(test_label, y_label.cpu().detach().numpy())            
+  
         
         if dataset_info_dict["task_type"] == "regression":
             train_score, valid_score = get_rmse_score(train_pred, train_label, y_std), get_rmse_score(valid_pred, valid_label, y_std)
@@ -147,7 +147,10 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
                 config["test_rmse"] = test_score
                 save_mode_with_json(model, config, json_info_output_path)
         else:
-            train_score, valid_score = get_accuracy_score(train_pred, train_label, dataset_info_dict), get_accuracy_score(valid_pred, valid_label, dataset_info_dict)
+            if dataset_info_dict["task_type"] == "binclass":        # ERROR
+                train_score, valid_score = get_accuracy_score(train_pred, train_label, dataset_info_dict), get_accuracy_score(valid_pred, valid_label, dataset_info_dict)
+            else:
+                train_score, valid_score = get_accuracy_score(train_pred, train_label, dataset_info_dict), get_accuracy_score(valid_pred, valid_label, dataset_info_dict)
 
             if best_valid < valid_score:
                 best_valid = valid_score
@@ -163,4 +166,3 @@ def model_run(model, optimizer, loss_fn, train_dataloader, valid_dataloader, tes
             "valid_score" : valid_score,
             "test_score" : test_score
         })
-# ValueError: Input contains NaN, infinity or a value too large for dtype('float64').

@@ -54,8 +54,8 @@ def load_model(config: ty.Dict , info_dict : ty.Dict):
                         
                         # default_Setting
                         token_bias = True,
-                        kv_compression = None,
-                        kv_compression_sharing= None,
+                        kv_compression = None if int(config["kv_compression"]) == 0 else int(config["kv_compression"]),
+                        kv_compression_sharing= None if int(config["kv_compression"]) == 0 else float(config["kv_compression"]),
                         d_out = int(info_dict["n_classes"]) if info_dict["task_type"] == "multiclass" else 1
         )
 

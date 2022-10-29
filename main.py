@@ -6,7 +6,6 @@ import typing as ty
 import argparse
 import torch
 from train import model_train
-from infer import model_infer
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -25,4 +24,4 @@ if __name__ == "__main__":
     if args.action == "train":
         model_train(args, config)
     else: # LATER UPDATE
-        model_infer(args, config)
+        pass

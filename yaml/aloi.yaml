@@ -35,7 +35,7 @@ resnet:
   
   # Model Architecture
   activation : "relu"
-  d : 168
+  d : 466
   d_embedding : 0
   d_hidden_factor : 3.39553393975761
   hidden_dropout : 0.152157876156

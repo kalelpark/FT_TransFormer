@@ -23,8 +23,8 @@ fttransformer:
   fold : 0
   count : 0
 
-  kv_compression : None
-  kv_compression_sharing : None
+  kv_compression : 0
+  kv_compression_sharing : 0
   # 256 -> 1 GPU, 
   # description: Training DL model [ FT_Transformer ] for Tabular Data
 
@@ -37,7 +37,7 @@ resnet:
   d_embedding : 0
   d_hidden_factor : 1.957975483255938
   hidden_dropout : 0.4912513875647882
-  n_layers : 3
+  n_layers : 8
   normalization : "batchnorm"
   residual_dropout : 0.2196702022131011
 
